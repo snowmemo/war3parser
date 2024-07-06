@@ -110,9 +110,7 @@ mod tests {
             .expect("failed to extract w3i");
 
         assert_eq!(w3i.filename, "war3map.w3i");
-        w3i.save("misc/w3i.w3i");
         let w3i: W3iFile = w3i.try_into().unwrap();
-        println!("{:#?}", w3i);
         assert_eq!(w3i.map_width, 160);
         assert_eq!(w3i.map_height, 128);
     }
