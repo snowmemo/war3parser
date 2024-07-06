@@ -23,7 +23,7 @@ impl War3Format {
         }
     }
 
-    pub fn is_present(&self, list: &Vec<String>) -> bool {
+    pub fn is_present(&self, list: &[String]) -> bool {
         let files = self.optional_files();
         for file in files {
             if list.contains(&file.to_string()) {
