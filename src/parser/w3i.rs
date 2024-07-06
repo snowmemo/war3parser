@@ -6,18 +6,206 @@
  *  Code based on https://github.com/Barogthor/WarEditor/blob/master/wce_map/src/w3i_file.rs
  */
 
+use bitfield::bitfield;
 use derivative::Derivative;
+use nom::{
+    bytes::complete::{take, take_until},
+    combinator::{cond, map},
+    multi::count,
+    number::complete::{le_f32, le_i32, le_u32, le_u8},
+    sequence::tuple,
+    IResult,
+};
+
+use crate::extractor::W3Raw;
+
+pub trait W3iParser {
+    fn parse(input: &[u8]) -> IResult<&[u8], Self>
+    where
+        Self: Sized;
+}
+
+fn parse_4char_string(input: &[u8]) -> IResult<&[u8], String> {
+    let (input, bytes) = take(4usize)(input)?;
+    let string = String::from_utf8(bytes.to_vec()).unwrap().to_string();
+    Ok((input, string))
+}
+
+fn parse_cstring(input: &[u8]) -> IResult<&[u8], String> {
+    let terminator = "\0";
+    let (input, bytes) = take_until(terminator)(input)?;
+    let (input, _) = take(1usize)(input)?;
+    let string = String::from_utf8(bytes.to_vec()).unwrap().to_string();
+    Ok((input, string))
+}
 
 #[derive(Debug, PartialOrd, PartialEq, Clone, Copy)]
 pub enum GameVersion {
-    RoC,
-    TFT,
-    Reforged,
+    RoC(u8),
+    TFT(u8),
+    Reforged(u8),
+    Known(u8),
+}
+
+impl AsRef<u8> for GameVersion {
+    fn as_ref(&self) -> &u8 {
+        match self {
+            GameVersion::RoC(version) => version,
+            GameVersion::TFT(version) => version,
+            GameVersion::Reforged(version) => version,
+            GameVersion::Known(version) => version,
+        }
+    }
+}
+
+#[allow(dead_code)]
+impl GameVersion {
+    fn gt(&self, v: u8) -> bool {
+        self.as_ref() > &v
+    }
+
+    fn ge(&self, v: u8) -> bool {
+        self.as_ref() >= &v
+    }
+
+    fn lt(&self, v: u8) -> bool {
+        self.as_ref() < &v
+    }
+
+    fn le(&self, v: u8) -> bool {
+        self.as_ref() <= &v
+    }
+
+    fn eq(&self, v: u8) -> bool {
+        self.as_ref() == &v
+    }
+
+    fn ne(&self, v: u8) -> bool {
+        self.as_ref() != &v
+    }
+
+    fn in_range(&self, low: u8, high: u8) -> bool {
+        self.ge(low) && self.le(high)
+    }
 }
 
 impl Default for GameVersion {
     fn default() -> Self {
-        GameVersion::TFT
+        GameVersion::TFT(25)
+    }
+}
+
+impl W3iParser for GameVersion {
+    fn parse(input: &[u8]) -> IResult<&[u8], Self> {
+        let (input, version) = le_i32(input)?;
+
+        let version = match version {
+            8 | 10 | 11 | 15 | 18 => GameVersion::RoC(version as u8),
+            23..=27 => GameVersion::TFT(version as u8),
+            28 | 31 => GameVersion::Reforged(version as u8),
+            _ => panic!("Invalid game version"),
+        };
+
+        Ok((input, version))
+    }
+}
+
+bitfield! {
+    #[derive(Default,PartialEq)]
+    pub struct MapFlags(u32);
+    impl Debug;
+    pub hide_minimap_on_preview_screens, set_hide_minimap_on_preview_screens: 0;
+    pub change_ally_priorities, set_change_ally_priorities: 1;
+    pub melee, set_melee: 2;
+    pub non_default_tileset_map_size_large_never_been_reduced_to_medium, set_non_default_tileset_map_size_large_never_been_reduced_to_medium: 3;
+    pub unexplored_areas_partially_visible, set_unexplored_areas_partially_visible: 4;
+    pub fixed_player_parameters_for_custom_teams, set_fixed_player_parameters_for_custom_teams: 5;
+    pub use_custom_teams, set_use_custom_teams: 6;
+    pub use_custom_techs, set_use_custom_techs: 7;
+
+    pub use_custom_abilities, set_use_custom_abilities: 8;
+    pub use_custom_upgrades, set_use_custom_upgrades: 9;
+    pub map_properties_menu_opened_at_least_once, set_map_properties_menu_opened_at_least_once: 10;
+    pub show_water_waves_on_cliff_shores, set_show_water_waves_on_cliff_shores: 11;
+    pub show_water_waves_on_rolling_shores, set_show_water_waves_on_rolling_shores: 12;
+    pub use_terrain_fog, set_use_terrain_fog: 13;
+    pub tft_required, set_tft_required: 14;
+    pub use_item_classification_system, set_use_item_classification_system: 15;
+
+    pub use_accurate_probabilities_for_calculation, set_use_accurate_probabilities_for_calculation: 17;
+    pub use_custom_ability_skin, set_use_custom_ability_skin: 18;
+    pub flag19, set_flag19: 19;
+    pub flag18, set_flag18: 20;
+    pub flag17, set_flag17: 21;
+    pub custom_water_tint_color, set_custom_water_tint_color: 22;
+}
+
+#[derive(Debug, PartialEq)]
+pub struct GameVersionCode {
+    pub major: u32,
+    pub minor: u32,
+    pub revision: u32,
+    pub build: u32,
+}
+
+impl W3iParser for GameVersionCode {
+    fn parse(input: &[u8]) -> IResult<&[u8], Self> {
+        let (input, (major, minor, revision, build)) =
+            tuple((le_u32, le_u32, le_u32, le_u32))(input)?;
+
+        Ok((
+            input,
+            GameVersionCode {
+                major,
+                minor,
+                revision,
+                build,
+            },
+        ))
+    }
+}
+
+#[derive(Debug, PartialEq)]
+pub struct FogStyle {
+    pub style: i32, // v >= 19
+    pub z_height_start: f32,
+    pub z_height_end: f32,
+    pub density: f32,
+    pub red_tint: u8,
+    pub green_tint: u8,
+    pub blue_tint: u8,
+    pub alpha_value: u8,
+}
+
+impl W3iParser for FogStyle {
+    fn parse(input: &[u8]) -> IResult<&[u8], Self> {
+        let (
+            input,
+            (
+                style,
+                z_height_start,
+                z_height_end,
+                density,
+                red_tint,
+                green_tint,
+                blue_tint,
+                alpha_value,
+            ),
+        ) = tuple((le_i32, le_f32, le_f32, le_f32, le_u8, le_u8, le_u8, le_u8))(input)?;
+
+        Ok((
+            input,
+            FogStyle {
+                style,
+                z_height_start,
+                z_height_end,
+                density,
+                red_tint,
+                green_tint,
+                blue_tint,
+                alpha_value,
+            },
+        ))
     }
 }
 
@@ -28,139 +216,478 @@ pub enum RandomTablePositionType {
     Item,
 }
 
+impl W3iParser for RandomTablePositionType {
+    fn parse(input: &[u8]) -> IResult<&[u8], Self> {
+        let (input, position_type) = le_i32(input)?;
+
+        let position_type = match position_type {
+            0 => RandomTablePositionType::Unit,
+            1 => RandomTablePositionType::Building,
+            2 => RandomTablePositionType::Item,
+            _ => panic!("Invalid random table position type"),
+        };
+
+        Ok((input, position_type))
+    }
+}
+
 #[derive(Debug, PartialEq)]
-struct RandomUnitSet {
+pub struct RandomUnitSet {
     chance: u32,
     ids: Vec<String>,
 }
 
 #[derive(Debug, PartialEq)]
-struct PlayerData {
-    player_id: i32,
-    player_type: i32,
-    player_race: i32,
-    fixed_position: i32,
-    player_name: String,
-    starting_pos_x: f32,
-    starting_pos_y: f32,
-    ally_low_priorities: i32,
-    ally_high_priorities: i32,
+pub struct PlayerData {
+    pub player_id: i32,
+    pub player_type: i32,
+    pub player_race: i32,
+    pub fixed_position: i32,
+    pub player_name: String,
+    pub starting_pos_x: f32,
+    pub starting_pos_y: f32,
+    pub ally_low_priorities: i32,
+    pub ally_high_priorities: i32,
+}
+
+impl W3iParser for PlayerData {
+    fn parse(input: &[u8]) -> IResult<&[u8], Self> {
+        let (
+            input,
+            (
+                player_id,
+                player_type,
+                player_race,
+                fixed_position,
+                player_name,
+                starting_pos_x,
+                starting_pos_y,
+                ally_low_priorities,
+                ally_high_priorities,
+            ),
+        ) = tuple((
+            le_i32,
+            le_i32,
+            le_i32,
+            le_i32,
+            parse_cstring,
+            le_f32,
+            le_f32,
+            le_i32,
+            le_i32,
+        ))(input)?;
+
+        Ok((
+            input,
+            PlayerData {
+                player_id,
+                player_type,
+                player_race,
+                fixed_position,
+                player_name,
+                starting_pos_x,
+                starting_pos_y,
+                ally_low_priorities,
+                ally_high_priorities,
+            },
+        ))
+    }
 }
 
 #[derive(Debug, PartialEq)]
-struct ForceData {
-    flags: i32,
-    allied: bool,
-    shared_victory: bool,
-    shared_vision: bool,
-    shared_unit_control: bool,
-    shared_advanced_unit_control: bool,
-    player_mask: i32,
-    name: String,
+pub struct ForceData {
+    pub flags: i32,
+    pub allied: bool,
+    pub shared_victory: bool,
+    pub shared_vision: bool,
+    pub shared_unit_control: bool,
+    pub shared_advanced_unit_control: bool,
+    pub player_mask: i32,
+    pub name: String,
+}
+
+impl W3iParser for ForceData {
+    /// Parses a ForceData from a byte slice.
+    fn parse(input: &[u8]) -> IResult<&[u8], Self> {
+        let (input, flags) = le_i32(input)?;
+        let allied = flags & 0x0001 != 0;
+        let shared_victory = flags & 0x0002 != 0;
+        let shared_vision = flags & 0x0004 != 0;
+        let shared_unit_control = flags & 0x0010 != 0;
+        let shared_advanced_unit_control = flags & 0x0020 != 0;
+        let (input, (player_mask, name)) = tuple((le_i32, parse_cstring))(input)?;
+
+        Ok((
+            input,
+            ForceData {
+                flags,
+                allied,
+                shared_victory,
+                shared_vision,
+                shared_unit_control,
+                shared_advanced_unit_control,
+                player_mask,
+                name,
+            },
+        ))
+    }
 }
 
 #[derive(Debug, PartialEq)]
-struct UpgradeAvailability {
-    player_availability: i32,
-    upgrade_id: String,
-    upgrade_level: i32,
-    availability: i32,
+pub struct UpgradeAvailability {
+    pub player_availability: i32,
+    pub upgrade_id: String,
+    pub upgrade_level: i32,
+    pub availability: i32,
+}
+
+impl W3iParser for UpgradeAvailability {
+    /// Parses an UpgradeAvailability from a byte slice.
+    fn parse(input: &[u8]) -> IResult<&[u8], Self> {
+        let (input, (player_availability, upgrade_id, upgrade_level, availability)) =
+            tuple((le_i32, parse_4char_string, le_i32, le_i32))(input)?;
+
+        Ok((
+            input,
+            UpgradeAvailability {
+                player_availability,
+                upgrade_id,
+                upgrade_level,
+                availability,
+            },
+        ))
+    }
 }
 
 #[derive(Debug, PartialEq)]
-struct TechAvailability {
-    player_availability: i32,
-    tech_id: String,
+pub struct TechAvailability {
+    pub player_availability: u32,
+    pub tech_id: String,
+}
+
+impl W3iParser for TechAvailability {
+    /// Parses a TechAvailability from a byte slice.
+    fn parse(input: &[u8]) -> IResult<&[u8], Self> {
+        let (input, (player_availability, tech_id)) = tuple((le_u32, parse_4char_string))(input)?;
+
+        Ok((
+            input,
+            TechAvailability {
+                player_availability,
+                tech_id,
+            },
+        ))
+    }
 }
 
 #[derive(Debug, PartialEq)]
-struct RandomUnitTable {
-    id: i32,
-    name: String,
-    position_types: Vec<RandomTablePositionType>,
-    sets: Vec<RandomUnitSet>,
+pub struct RandomUnitTable {
+    pub id: i32,
+    pub name: String,
+    pub position_types: Vec<RandomTablePositionType>,
+    pub sets: Vec<RandomUnitSet>,
+}
+
+impl W3iParser for RandomUnitTable {
+    /// Parses a RandomUnitTable from a byte slice.
+    /// Ref: https://867380699.github.io/blog/2019/05/09/W3X_Files_Format#war3mapw3i:~:text=Random%20unit%20table%20format
+    fn parse(input: &[u8]) -> IResult<&[u8], Self> {
+        let (input, (id, name)) = tuple((le_i32, parse_cstring))(input)?;
+        let (input, count_pos) = le_u32(input)?;
+        let (input, position_types) =
+            count(RandomTablePositionType::parse, count_pos as usize)(input)?;
+        let (input, count_sets) = le_u32(input)?;
+        let (input, sets) = count(
+            map(
+                tuple((le_u32, count(parse_cstring, count_pos as usize))),
+                |(chance, ids)| RandomUnitSet { chance, ids },
+            ),
+            count_sets as usize,
+        )(input)?;
+
+        Ok((
+            input,
+            RandomUnitTable {
+                id,
+                name,
+                position_types,
+                sets,
+            },
+        ))
+    }
 }
 
 #[derive(Debug, PartialEq)]
-struct RandomItemSet {
+pub struct RandomItemSet {
     items: Vec<(u32, String)>,
+}
+
+impl W3iParser for RandomItemSet {
+    /// Parses a RandomItemSet from a byte slice.
+    fn parse(input: &[u8]) -> IResult<&[u8], Self> {
+        let (input, count_items) = le_u32(input)?;
+        let (input, items) = count(
+            map(tuple((le_u32, parse_cstring)), |(chance, id)| (chance, id)),
+            count_items as usize,
+        )(input)?;
+
+        Ok((input, RandomItemSet { items }))
+    }
 }
 
 #[derive(Debug, PartialEq)]
 pub struct RandomItemTable {
-    id: i32,
-    name: String,
-    sets: Vec<RandomItemSet>,
+    pub id: i32,
+    pub name: String,
+    pub sets: Vec<RandomItemSet>,
+}
+
+impl W3iParser for RandomItemTable {
+    /// Parses a RandomItemTable from a byte slice.
+    fn parse(input: &[u8]) -> IResult<&[u8], Self> {
+        let (input, (id, name)) = tuple((le_i32, parse_cstring))(input)?;
+        let (input, count_sets) = le_u32(input)?;
+        let (input, sets) = count(RandomItemSet::parse, count_sets as usize)(input)?;
+
+        Ok((input, RandomItemTable { id, name, sets }))
+    }
 }
 
 #[derive(Derivative)]
 #[derivative(Debug, Default, PartialEq)]
 pub struct W3iFile {
-    version: GameVersion,
+    pub version: GameVersion,
     #[derivative(PartialEq = "ignore")]
-    count_saves: i32,
+    pub count_saves: Option<i32>, // v >= 16
     #[derivative(PartialEq = "ignore")]
-    editor_version: i32,
-    map_name: String,
-    map_author: String,
-    map_description: String,
-    recommended_players: String,
-    camera_bounds: Vec<f32>,             // 8
-    camera_bounds_complements: Vec<i32>, // 4
-    map_playable_width: i32,
-    map_playable_height: i32,
+    pub editor_version: Option<i32>, // v >= 16
+    pub game_version: Option<GameVersionCode>, // v >= 28
+    pub map_name: String,
+    pub map_author: String,
+    pub map_description: String,
+    pub recommended_players: String,
+    pub camera_bounds: Vec<f32>,
+    pub camera_bounds_complements: Vec<i32>,
+    pub map_playable_width: i32,
+    pub map_playable_height: i32,
+    pub map_width: i32,
+    pub map_height: i32,
+    pub flags: MapFlags,
 
-    flags: i32,
-    hide_minimap_preview: bool,
-    modifiy_ally_priorities: bool,
-    is_melee: bool,
-    unknown: bool,
-    mask_partial_vision: bool,
-    fixed_custom_player_force: bool,
-    use_custom_force: bool,
-    use_custom_tree: bool,
-    use_custom_abilities: bool,
-    use_custom_upgrades: bool,
-    unkwown_2: bool,
-    show_waves_cliff_shores: bool,
-    show_waves_rolling_shores: bool,
-    unkwown_3: bool, // TFT
-    unkwown_4: bool, // TFT
-    unkwown_5: bool, // TFT
+    pub ground_type: char,
+    pub loading_screen_index: i32,
+    pub custom_loading_screen_model_path: Option<String>, // v != 18 && v != 19
+    pub loading_screen_text: String,
+    pub loading_screen_title: String,
+    pub loading_screen_subtitle: String,
+    pub user_game_dataset: Option<i32>,       // v >= 17
+    pub prologue_screen_path: Option<String>, // v != 18 && v != 19
+    pub prologue_screen_text: String,
+    pub prologue_screen_title: String,
+    pub prologue_screen_subtitle: String,
 
-    ground_type: char,
-    campaign_background: i32,                 // RoC
-    custom_loading_screen_model_path: String, // TFT
-    loading_screen_index: i32,
-    loading_screen_text: String,
-    loading_screen_title: String,
-    loading_screen_subtitle: String,
-    user_game_dataset: i32,       // TFT
-    prologue_screen_path: String, // TFT
-    prologue_screen_text: String,
-    prologue_screen_title: String,
-    prologue_screen_subtitle: String,
-    // TFT
-    fog_style: i32,
-    fog_z_height_start: f32,
-    fog_z_height_end: f32,
-    fog_density: f32,
-    fog_red_tint: u8,
-    fog_green_tint: u8,
-    fog_blue_tint: u8,
-    fog_alpha_value: u8,
-    global_weather: i32,
-    custom_sound_environment: String,
-    custom_light_environment_id: char,
-    custom_water_red_tint: u8,
-    custom_water_green_tint: u8,
-    custom_water_blue_tint: u8,
-    custom_water_alpha_tint: u8,
+    pub fog_style: Option<FogStyle>,               // v >= 19
+    pub global_weather: Option<i32>,               // v >= 21
+    pub custom_sound_environment: Option<String>,  // v >= 22
+    pub custom_light_environment_id: Option<char>, // v >= 23
+    pub custom_water_red_tint: Option<u8>,         // v >= 25
+    pub custom_water_green_tint: Option<u8>,       // v >= 25
+    pub custom_water_blue_tint: Option<u8>,        // v >= 25
+    pub custom_water_alpha_tint: Option<u8>,       // v >= 25
 
-    players: Vec<PlayerData>,
-    forces: Vec<ForceData>,
-    upgrades: Vec<UpgradeAvailability>,
-    techs: Vec<TechAvailability>,
-    random_unit_tables: Vec<RandomUnitTable>,
-    random_item_tables: Vec<RandomItemTable>,
+    pub script_language: Option<u32>,          // v >= 28
+    pub supported_graphics_modes: Option<i32>, // v >= 29
+    pub game_data_version: Option<u32>,        // v >= 30
+
+    pub players: Vec<PlayerData>,
+    pub forces: Vec<ForceData>,
+    pub upgrades: Vec<UpgradeAvailability>,
+    pub techs: Vec<TechAvailability>,
+    pub random_unit_tables: Vec<RandomUnitTable>,
+    pub random_item_tables: Option<Vec<RandomItemTable>>, // v >= 24
+    pub script_language2: Option<u32>,                    // v == 26 or v == 27
+}
+
+impl W3iParser for W3iFile {
+    fn parse(input: &[u8]) -> IResult<&[u8], Self> {
+        let (input, version) = GameVersion::parse(input)?;
+        let (
+            input,
+            (
+                count_saves,
+                editor_version,
+                game_version,
+                map_name,
+                map_author,
+                map_description,
+                recommended_players,
+                camera_bounds,
+                camera_bounds_complements,
+                map_playable_width,
+                map_playable_height,
+                flags,
+            ),
+        ) = tuple((
+            cond(version.gt(16), le_i32),
+            cond(version.gt(16), le_i32),
+            cond(version.gt(32), GameVersionCode::parse),
+            parse_cstring,
+            parse_cstring,
+            parse_cstring,
+            parse_cstring,
+            count(le_f32, 8),
+            count(le_i32, 4),
+            le_i32,
+            le_i32,
+            le_u32,
+        ))(input)?;
+
+        let (input, ground_type) = le_u8(input)?;
+
+        let (
+            input,
+            (
+                loading_screen_index,
+                custom_loading_screen_model_path,
+                loading_screen_text,
+                loading_screen_title,
+                loading_screen_subtitle,
+                user_game_dataset,
+                prologue_screen_path,
+                prologue_screen_text,
+                prologue_screen_title,
+                prologue_screen_subtitle,
+            ),
+        ) = tuple((
+            le_i32,
+            cond(version.ne(18) && version.ne(19), parse_cstring),
+            parse_cstring,
+            parse_cstring,
+            parse_cstring,
+            cond(version.ge(17), le_i32),
+            cond(version.ne(18) && version.ne(19), parse_cstring),
+            parse_cstring,
+            parse_cstring,
+            parse_cstring,
+        ))(input)?;
+
+        let (
+            input,
+            (
+                fog_style,
+                global_weather,
+                custom_sound_environment,
+                custom_light_environment_id,
+                custom_water_red_tint,
+                custom_water_green_tint,
+                custom_water_blue_tint,
+                custom_water_alpha_tint,
+            ),
+        ) = tuple((
+            cond(version.ge(19), FogStyle::parse),
+            cond(version.ge(21), le_i32),
+            cond(version.ge(22), parse_cstring),
+            cond(version.ge(23), le_u8),
+            cond(version.ge(25), le_u8),
+            cond(version.ge(25), le_u8),
+            cond(version.ge(25), le_u8),
+            cond(version.ge(25), le_u8),
+        ))(input)?;
+
+        let (input, (script_language, supported_graphics_modes, game_data_version)) =
+            tuple((
+                cond(version.ge(28), le_u32),
+                cond(version.ge(29), le_i32),
+                cond(version.ge(30), le_u32),
+            ))(input)?;
+
+        let (input, count_players) = le_i32(input)?;
+        let (input, players) = count(PlayerData::parse, count_players as usize)(input)?;
+        let (input, count_forces) = le_i32(input)?;
+        let (input, forces) = count(ForceData::parse, count_forces as usize)(input)?;
+        let (input, count_upgrades) = le_i32(input)?;
+        let (input, upgrades) = count(UpgradeAvailability::parse, count_upgrades as usize)(input)?;
+        let (input, count_techs) = le_i32(input)?;
+        let (input, techs) = count(TechAvailability::parse, count_techs as usize)(input)?;
+        let (input, count_random_unit_tables) = le_i32(input)?;
+        let (input, random_unit_tables) =
+            count(RandomUnitTable::parse, count_random_unit_tables as usize)(input)?;
+        let (input, count_random_item_tables) = cond(version.ge(24), le_u32)(input)?;
+        let (input, random_item_tables) = cond(
+            count_random_item_tables.is_some(),
+            count(
+                RandomItemTable::parse,
+                count_random_item_tables.unwrap() as usize,
+            ),
+        )(input)?;
+
+        let (input, script_language2) = cond(version.eq(26) || version.eq(27), le_u32)(input)?;
+
+        let flags = MapFlags(flags);
+        let map_width =
+            camera_bounds_complements[0] + camera_bounds_complements[1] + map_playable_width;
+        let map_height =
+            camera_bounds_complements[2] + camera_bounds_complements[3] + map_playable_height;
+
+        Ok((
+            input,
+            W3iFile {
+                version,
+                count_saves,
+                editor_version,
+                game_version,
+                map_name,
+                map_author,
+                map_description,
+                recommended_players,
+                camera_bounds,
+                camera_bounds_complements,
+                map_playable_width,
+                map_playable_height,
+                map_width,
+                map_height,
+                flags,
+                ground_type: ground_type as char,
+                loading_screen_index,
+                custom_loading_screen_model_path,
+                loading_screen_text,
+                loading_screen_title,
+                loading_screen_subtitle,
+                user_game_dataset,
+                prologue_screen_path,
+                prologue_screen_text,
+                prologue_screen_title,
+                prologue_screen_subtitle,
+                fog_style,
+                global_weather,
+                custom_sound_environment,
+                custom_light_environment_id: custom_light_environment_id.map(|c| c as char),
+                custom_water_red_tint,
+                custom_water_green_tint,
+                custom_water_blue_tint,
+                custom_water_alpha_tint,
+                script_language,
+                supported_graphics_modes,
+                game_data_version,
+                players,
+                forces,
+                upgrades,
+                techs,
+                random_unit_tables,
+                random_item_tables,
+                script_language2,
+            },
+        ))
+    }
+}
+
+impl TryFrom<W3Raw> for W3iFile {
+    type Error = &'static str;
+
+    fn try_from(w3raw: W3Raw) -> Result<Self, Self::Error> {
+        match W3iFile::parse(&w3raw.data) {
+            Ok((_, w3i)) => Ok(w3i),
+            Err(_) => Err("Failed to parse W3I file"),
+        }
+    }
 }

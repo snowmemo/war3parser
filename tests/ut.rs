@@ -28,12 +28,12 @@ pub fn load_mpq(filename: &str) -> Extractor {
 
 mod tests {
     use image::RgbaImage;
-    use war3parser::preview::ImageRaw;
+    use war3parser::{parser::w3i::W3iFile, preview::ImageRaw};
 
     use super::*;
 
     #[test]
-    fn mpq_list_files() {
+    fn test_list_files() {
         let mut extractor = load_mpq(MAP_1.path);
         let listfiles = extractor.list().expect("failed to list files");
         assert_eq!(listfiles.len(), MAP_1.listfile_count);
@@ -52,7 +52,7 @@ mod tests {
     }
 
     #[test]
-    fn mpq_extract_format() {
+    fn test_extract_format() {
         let mut extractor = load_mpq(MAP_1.path);
         let wts = extractor
             .extract(War3Format::Wts)
@@ -100,5 +100,20 @@ mod tests {
             rgba.pixels().collect::<Vec<_>>(),
             expected.pixels().collect::<Vec<_>>()
         );
+    }
+
+    #[test]
+    fn test_parse_w3i_tft() {
+        let mut extractor = load_mpq(MAP_1.path);
+        let w3i = extractor
+            .extract(War3Format::W3i)
+            .expect("failed to extract w3i");
+
+        assert_eq!(w3i.filename, "war3map.w3i");
+        w3i.save("misc/w3i.w3i");
+        let w3i: W3iFile = w3i.try_into().unwrap();
+        println!("{:#?}", w3i);
+        assert_eq!(w3i.map_width, 160);
+        assert_eq!(w3i.map_height, 128);
     }
 }

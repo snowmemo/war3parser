@@ -50,6 +50,12 @@ impl Display for W3Raw {
     }
 }
 
+impl W3Raw {
+    pub fn save(&self, filename: &str) {
+        std::fs::write(filename, &self.data).unwrap();
+    }
+}
+
 pub struct Extractor {
     archive: Archive,
 }
