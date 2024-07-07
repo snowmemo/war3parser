@@ -8,6 +8,7 @@
 
 use bitfield::bitfield;
 use derivative::Derivative;
+use enum_display::EnumDisplay;
 use nom::{
     bytes::complete::{take, take_until},
     combinator::{cond, map},
@@ -39,7 +40,8 @@ fn parse_cstring(input: &[u8]) -> IResult<&[u8], String> {
     Ok((input, string))
 }
 
-#[derive(Debug, PartialOrd, PartialEq, Clone, Copy)]
+#[derive(Debug, PartialOrd, PartialEq, Clone, Copy, EnumDisplay)]
+#[enum_display(case = "Pascal")]
 pub enum GameVersion {
     RoC(u8),
     TFT(u8),
@@ -192,7 +194,8 @@ impl W3iParser for FogStyle {
     }
 }
 
-#[derive(Debug, PartialEq, Clone, PartialOrd)]
+#[derive(Debug, PartialEq, Clone, PartialOrd, EnumDisplay)]
+#[enum_display(case = "Pascal")]
 pub enum RandomTablePositionType {
     Unit,
     Building,
@@ -437,7 +440,8 @@ impl W3iParser for RandomItemTable {
     }
 }
 
-#[derive(Debug, PartialEq, Default)]
+#[derive(Debug, PartialEq, Default, EnumDisplay)]
+#[enum_display(case = "Pascal")]
 pub enum Tileset {
     #[default]
     Ashenvale,
@@ -490,7 +494,8 @@ impl W3iParser for Tileset {
     }
 }
 
-#[derive(Debug, PartialEq, Default)]
+#[derive(Debug, PartialEq, Default, EnumDisplay)]
+#[enum_display(case = "Pascal")]
 pub enum MapSize {
     #[default]
     Tiny,

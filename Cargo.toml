@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 bitfield = "0.15.0"
 derivative = "2.2.0"
+enum-display = "0.1.4"
 image = "0.24.3"
 image-blp = "1.2.0"
 mpq = "0.8.0"
