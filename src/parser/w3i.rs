@@ -79,15 +79,17 @@ impl Default for GameVersion {
 impl W3iParser for GameVersion {
     fn parse(input: &[u8]) -> IResult<&[u8], Self> {
         let (input, version) = le_i32(input)?;
+        let version = version as u8;
 
-        let version = match version {
-            8 | 10 | 11 | 15 | 18 => GameVersion::RoC(version as u8),
-            23..=27 => GameVersion::TFT(version as u8),
-            28 | 31 => GameVersion::Reforged(version as u8),
-            _ => panic!("Invalid game version"),
-        };
-
-        Ok((input, version))
+        match version {
+            8 | 10 | 11 | 15 | 18 => Ok((input, GameVersion::RoC(version))),
+            23..=27 => Ok((input, GameVersion::TFT(version))),
+            28 | 31 => Ok((input, GameVersion::Reforged(version))),
+            _ => Err(nom::Err::Error(nom::error::Error::new(
+                input,
+                nom::error::ErrorKind::Fail,
+            ))),
+        }
     }
 }
 
@@ -201,14 +203,15 @@ impl W3iParser for RandomTablePositionType {
     fn parse(input: &[u8]) -> IResult<&[u8], Self> {
         let (input, position_type) = le_i32(input)?;
 
-        let position_type = match position_type {
-            0 => RandomTablePositionType::Unit,
-            1 => RandomTablePositionType::Building,
-            2 => RandomTablePositionType::Item,
-            _ => panic!("Invalid random table position type"),
-        };
-
-        Ok((input, position_type))
+        match position_type {
+            0 => Ok((input, RandomTablePositionType::Unit)),
+            1 => Ok((input, RandomTablePositionType::Building)),
+            2 => Ok((input, RandomTablePositionType::Item)),
+            _ => Err(nom::Err::Error(nom::error::Error::new(
+                input,
+                nom::error::ErrorKind::Fail,
+            ))),
+        }
     }
 }
 
@@ -434,6 +437,91 @@ impl W3iParser for RandomItemTable {
     }
 }
 
+#[derive(Debug, PartialEq, Default)]
+pub enum Tileset {
+    #[default]
+    Ashenvale,
+    Barrens,
+    Felwood,
+    Dungeon,
+    LordaeronFall,
+    Underground,
+    Icecrown,
+    DalaranRuins,
+    BlackCitadel,
+    LordaeronSummer,
+    Northrend,
+    Outland,
+    VillageFall,
+    Village,
+    LordaeronWinter,
+    Dalaran,
+    Cityscape,
+    SunkenRuins,
+    Known,
+}
+
+impl W3iParser for Tileset {
+    fn parse(input: &[u8]) -> IResult<&[u8], Self> {
+        let (input, tileset) = le_u8(input)?;
+        let tileset = tileset as char;
+        let tileset = match tileset {
+            'A' => Tileset::Ashenvale,
+            'B' => Tileset::Barrens,
+            'C' => Tileset::Felwood,
+            'D' => Tileset::Dungeon,
+            'F' => Tileset::LordaeronFall,
+            'G' => Tileset::Underground,
+            'I' => Tileset::Icecrown,
+            'J' => Tileset::DalaranRuins,
+            'K' => Tileset::BlackCitadel,
+            'L' => Tileset::LordaeronSummer,
+            'N' => Tileset::Northrend,
+            'O' => Tileset::Outland,
+            'Q' => Tileset::VillageFall,
+            'V' => Tileset::Village,
+            'W' => Tileset::LordaeronWinter,
+            'X' => Tileset::Dalaran,
+            'Y' => Tileset::Cityscape,
+            'Z' => Tileset::SunkenRuins,
+            _ => Tileset::Known,
+        };
+        Ok((input, tileset))
+    }
+}
+
+#[derive(Debug, PartialEq, Default)]
+pub enum MapSize {
+    #[default]
+    Tiny,
+    ExtraSmall,
+    Small,
+    Medium,
+    Large,
+    ExtraLarge,
+    Huge,
+    Epic,
+    Legendary,
+    Unknown,
+}
+
+impl MapSize {
+    pub fn from_area(area: i32) -> Self {
+        match area {
+            45..=6600 => MapSize::Tiny,
+            6601..=12800 => MapSize::ExtraSmall,
+            12801..=21000 => MapSize::Small,
+            21001..=31000 => MapSize::Medium,
+            31001..=43500 => MapSize::Large,
+            43501..=74000 => MapSize::ExtraLarge,
+            74001..=135000 => MapSize::Huge,
+            135001..=215000 => MapSize::Epic,
+            215001..=230400 => MapSize::Legendary,
+            _ => MapSize::Unknown,
+        }
+    }
+}
+
 #[derive(Derivative)]
 #[derivative(Debug, Default, PartialEq)]
 pub struct W3iFile {
@@ -453,9 +541,10 @@ pub struct W3iFile {
     pub map_playable_height: i32,
     pub map_width: i32,
     pub map_height: i32,
+    pub map_size: MapSize,
     pub flags: MapFlags,
 
-    pub ground_type: char,
+    pub tileset: Tileset,
     pub loading_screen_index: i32,
     pub custom_loading_screen_model_path: Option<String>, // v != 18 && v != 19
     pub loading_screen_text: String,
@@ -523,7 +612,7 @@ impl W3iParser for W3iFile {
             le_u32,
         ))(input)?;
 
-        let (input, ground_type) = le_u8(input)?;
+        let (input, tileset) = Tileset::parse(input)?;
 
         let (
             input,
@@ -609,7 +698,7 @@ impl W3iParser for W3iFile {
             camera_bounds_complements[0] + camera_bounds_complements[1] + map_playable_width;
         let map_height =
             camera_bounds_complements[2] + camera_bounds_complements[3] + map_playable_height;
-
+        let map_size = MapSize::from_area(map_playable_height * map_playable_width);
         Ok((
             input,
             W3iFile {
@@ -627,8 +716,9 @@ impl W3iParser for W3iFile {
                 map_playable_height,
                 map_width,
                 map_height,
+                map_size,
                 flags,
-                ground_type: ground_type as char,
+                tileset,
                 loading_screen_index,
                 custom_loading_screen_model_path,
                 loading_screen_text,
