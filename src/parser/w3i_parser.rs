@@ -196,7 +196,7 @@ impl W3Parser for TechAvailability {
 
 impl W3Parser for RandomUnitTable {
     /// Parses a RandomUnitTable from a byte slice.
-    /// Ref: https://867380699.github.io/blog/2019/05/09/W3X_Files_Format#war3mapw3i:~:text=Random%20unit%20table%20format
+    /// Ref: <https://867380699.github.io/blog/2019/05/09/W3X_Files_Format#war3mapw3i:~:text=Random%20unit%20table%20format>
     fn parse(input: &[u8]) -> IResult<&[u8], Self> {
         let (input, (id, name)) = tuple((le_i32, parse_cstring))(input)?;
         let (input, count_pos) = le_u32(input)?;
