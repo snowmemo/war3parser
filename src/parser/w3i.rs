@@ -1,13 +1,15 @@
 use derivative::Derivative;
 use enum_display::EnumDisplay;
+use ts_rs::TS;
 
 use crate::extractor::W3Raw;
 use crate::parser::w3parser::W3Parser;
 
 use super::w3parser::get_bit_from_u32;
 
-#[derive(Debug, PartialOrd, PartialEq, Clone, Copy, EnumDisplay)]
+#[derive(Debug, PartialOrd, PartialEq, Clone, Copy, EnumDisplay, TS)]
 #[enum_display(case = "Pascal")]
+#[ts(export)]
 pub enum GameVersion {
     RoC(u8),
     TFT(u8),
@@ -44,7 +46,8 @@ impl Default for GameVersion {
     }
 }
 
-#[derive(Debug, PartialEq, Default)]
+#[derive(Debug, PartialEq, Default, TS)]
+#[ts(export)]
 pub struct MapFlags {
     pub flags: u32,
     pub hide_minimap_on_preview_screens: bool,
@@ -107,7 +110,8 @@ impl MapFlags {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, TS)]
+#[ts(export)]
 pub struct GameVersionCode {
     pub major: u32,
     pub minor: u32,
@@ -115,7 +119,8 @@ pub struct GameVersionCode {
     pub build: u32,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, TS)]
+#[ts(export)]
 pub struct FogStyle {
     pub style: i32, // v >= 19
     pub z_height_start: f32,
@@ -127,21 +132,24 @@ pub struct FogStyle {
     pub alpha_value: u8,
 }
 
-#[derive(Debug, PartialEq, Clone, PartialOrd, EnumDisplay)]
+#[derive(Debug, PartialEq, Clone, PartialOrd, EnumDisplay, TS)]
 #[enum_display(case = "Pascal")]
+#[ts(export)]
 pub enum RandomTablePositionType {
     Unit,
     Building,
     Item,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, TS)]
+#[ts(export)]
 pub struct RandomUnitSet {
     pub chance: u32,
     pub ids: Vec<String>,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, TS)]
+#[ts(export)]
 pub struct PlayerData {
     pub player_id: i32,
     pub player_type: i32,
@@ -154,7 +162,8 @@ pub struct PlayerData {
     pub ally_high_priorities: i32,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, TS)]
+#[ts(export)]
 pub struct ForceData {
     pub flags: i32,
     pub allied: bool,
@@ -166,7 +175,8 @@ pub struct ForceData {
     pub name: String,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, TS)]
+#[ts(export)]
 pub struct UpgradeAvailability {
     pub player_availability: i32,
     pub upgrade_id: String,
@@ -174,13 +184,15 @@ pub struct UpgradeAvailability {
     pub availability: i32,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, TS)]
+#[ts(export)]
 pub struct TechAvailability {
     pub player_availability: u32,
     pub tech_id: String,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, TS)]
+#[ts(export)]
 pub struct RandomUnitTable {
     pub id: i32,
     pub name: String,
@@ -188,20 +200,23 @@ pub struct RandomUnitTable {
     pub sets: Vec<RandomUnitSet>,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, TS)]
+#[ts(export)]
 pub struct RandomItemSet {
     pub items: Vec<(u32, String)>,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, TS)]
+#[ts(export)]
 pub struct RandomItemTable {
     pub id: i32,
     pub name: String,
     pub sets: Vec<RandomItemSet>,
 }
 
-#[derive(Debug, PartialEq, Default, EnumDisplay)]
+#[derive(Debug, PartialEq, Default, EnumDisplay, TS)]
 #[enum_display(case = "Pascal")]
+#[ts(export)]
 pub enum Tileset {
     #[default]
     Ashenvale,
@@ -225,8 +240,9 @@ pub enum Tileset {
     Known,
 }
 
-#[derive(Debug, PartialEq, Default, EnumDisplay)]
+#[derive(Debug, PartialEq, Default, EnumDisplay, TS)]
 #[enum_display(case = "Pascal")]
+#[ts(export)]
 pub enum MapSize {
     #[default]
     Tiny,
@@ -258,8 +274,9 @@ impl MapSize {
     }
 }
 
-#[derive(Derivative)]
+#[derive(Derivative, TS)]
 #[derivative(Debug, Default, PartialEq)]
+#[ts(export)]
 pub struct W3iFile {
     pub version: GameVersion,
     #[derivative(PartialEq = "ignore")]
