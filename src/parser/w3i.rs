@@ -1,4 +1,4 @@
-use bitfield::bitfield;
+use bitfield_struct::bitfield;
 use derivative::Derivative;
 use enum_display::EnumDisplay;
 
@@ -43,34 +43,36 @@ impl Default for GameVersion {
     }
 }
 
-bitfield! {
-    #[derive(Default,PartialEq)]
-    pub struct MapFlags(u32);
-    impl Debug;
-    pub hide_minimap_on_preview_screens, set_hide_minimap_on_preview_screens: 0;
-    pub change_ally_priorities, set_change_ally_priorities: 1;
-    pub melee, set_melee: 2;
-    pub non_default_tileset_map_size_large_never_been_reduced_to_medium, set_non_default_tileset_map_size_large_never_been_reduced_to_medium: 3;
-    pub unexplored_areas_partially_visible, set_unexplored_areas_partially_visible: 4;
-    pub fixed_player_parameters_for_custom_teams, set_fixed_player_parameters_for_custom_teams: 5;
-    pub use_custom_teams, set_use_custom_teams: 6;
-    pub use_custom_techs, set_use_custom_techs: 7;
+#[bitfield(u32)]
+#[derive(PartialEq)]
+pub struct MapFlags {
+    pub hide_minimap_on_preview_screens: bool,
+    pub change_ally_priorities: bool,
+    pub melee: bool,
+    pub non_default_tileset_map_size_large_never_been_reduced_to_medium: bool,
+    pub unexplored_areas_partially_visible: bool,
+    pub fixed_player_parameters_for_custom_teams: bool,
+    pub use_custom_teams: bool,
+    pub use_custom_techs: bool,
 
-    pub use_custom_abilities, set_use_custom_abilities: 8;
-    pub use_custom_upgrades, set_use_custom_upgrades: 9;
-    pub map_properties_menu_opened_at_least_once, set_map_properties_menu_opened_at_least_once: 10;
-    pub show_water_waves_on_cliff_shores, set_show_water_waves_on_cliff_shores: 11;
-    pub show_water_waves_on_rolling_shores, set_show_water_waves_on_rolling_shores: 12;
-    pub use_terrain_fog, set_use_terrain_fog: 13;
-    pub tft_required, set_tft_required: 14;
-    pub use_item_classification_system, set_use_item_classification_system: 15;
+    pub use_custom_abilities: bool,
+    pub use_custom_upgrades: bool,
+    pub map_properties_menu_opened_at_least_once: bool,
+    pub show_water_waves_on_cliff_shores: bool,
+    pub show_water_waves_on_rolling_shores: bool,
+    pub use_terrain_fog: bool,
+    pub tft_required: bool,
+    pub use_item_classification_system: bool,
 
-    pub use_accurate_probabilities_for_calculation, set_use_accurate_probabilities_for_calculation: 17;
-    pub use_custom_ability_skin, set_use_custom_ability_skin: 18;
-    pub flag19, set_flag19: 19;
-    pub flag18, set_flag18: 20;
-    pub flag17, set_flag17: 21;
-    pub custom_water_tint_color, set_custom_water_tint_color: 22;
+    pub use_accurate_probabilities_for_calculation: bool,
+    pub use_custom_ability_skin: bool,
+    pub flag19: bool,
+    pub flag18: bool,
+    pub flag17: bool,
+    pub custom_water_tint_color: bool,
+
+    #[bits(10)]
+    _reserved: u32,
 }
 
 #[derive(Debug, PartialEq)]
