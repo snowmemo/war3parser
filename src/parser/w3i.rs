@@ -1,9 +1,10 @@
-use bitfield_struct::bitfield;
 use derivative::Derivative;
 use enum_display::EnumDisplay;
 
 use crate::extractor::W3Raw;
 use crate::parser::w3parser::W3Parser;
+
+use super::w3parser::get_bit_from_u32;
 
 #[derive(Debug, PartialOrd, PartialEq, Clone, Copy, EnumDisplay)]
 #[enum_display(case = "Pascal")]
@@ -43,9 +44,9 @@ impl Default for GameVersion {
     }
 }
 
-#[bitfield(u32)]
-#[derive(PartialEq)]
+#[derive(Debug, PartialEq, Default)]
 pub struct MapFlags {
+    pub flags: u32,
     pub hide_minimap_on_preview_screens: bool,
     pub change_ally_priorities: bool,
     pub melee: bool,
@@ -70,9 +71,40 @@ pub struct MapFlags {
     pub flag18: bool,
     pub flag17: bool,
     pub custom_water_tint_color: bool,
+}
 
-    #[bits(10)]
-    _reserved: u32,
+impl MapFlags {
+    pub fn new(flags: u32) -> Self {
+        MapFlags {
+            flags,
+            hide_minimap_on_preview_screens: get_bit_from_u32(flags, 0),
+            change_ally_priorities: get_bit_from_u32(flags, 1),
+            melee: get_bit_from_u32(flags, 2),
+            non_default_tileset_map_size_large_never_been_reduced_to_medium: get_bit_from_u32(
+                flags, 3,
+            ),
+            unexplored_areas_partially_visible: get_bit_from_u32(flags, 4),
+            fixed_player_parameters_for_custom_teams: get_bit_from_u32(flags, 5),
+            use_custom_teams: get_bit_from_u32(flags, 6),
+            use_custom_techs: get_bit_from_u32(flags, 7),
+
+            use_custom_abilities: get_bit_from_u32(flags, 8),
+            use_custom_upgrades: get_bit_from_u32(flags, 9),
+            map_properties_menu_opened_at_least_once: get_bit_from_u32(flags, 10),
+            show_water_waves_on_cliff_shores: get_bit_from_u32(flags, 11),
+            show_water_waves_on_rolling_shores: get_bit_from_u32(flags, 12),
+            use_terrain_fog: get_bit_from_u32(flags, 13),
+            tft_required: get_bit_from_u32(flags, 14),
+            use_item_classification_system: get_bit_from_u32(flags, 15),
+
+            use_accurate_probabilities_for_calculation: get_bit_from_u32(flags, 16),
+            use_custom_ability_skin: get_bit_from_u32(flags, 17),
+            flag19: get_bit_from_u32(flags, 18),
+            flag18: get_bit_from_u32(flags, 19),
+            flag17: get_bit_from_u32(flags, 20),
+            custom_water_tint_color: get_bit_from_u32(flags, 21),
+        }
+    }
 }
 
 #[derive(Debug, PartialEq)]

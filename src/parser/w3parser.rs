@@ -22,3 +22,7 @@ pub fn parse_cstring(input: &[u8]) -> IResult<&[u8], String> {
     let string = String::from_utf8(bytes.to_vec()).unwrap().to_string();
     Ok((input, string))
 }
+
+pub fn get_bit_from_u32(value: u32, bit: u32) -> bool {
+    (value & (1 << bit)) != 0
+}

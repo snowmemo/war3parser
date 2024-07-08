@@ -391,7 +391,7 @@ impl W3Parser for W3iFile {
 
         let (input, script_language2) = cond(v == 26 || v == 27, le_u32)(input)?;
 
-        let flags = MapFlags::from_bits(flags);
+        let flags = MapFlags::new(flags);
         let map_width =
             camera_bounds_complements[0] + camera_bounds_complements[1] + map_playable_width;
         let map_height =
