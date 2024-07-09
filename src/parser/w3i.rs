@@ -1,5 +1,6 @@
 use derivative::Derivative;
 use enum_display::EnumDisplay;
+use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 
 use crate::extractor::W3Raw;
@@ -7,7 +8,7 @@ use crate::parser::w3parser::W3Parser;
 
 use super::w3parser::get_bit_from_u32;
 
-#[derive(Debug, PartialOrd, PartialEq, Clone, Copy, EnumDisplay, TS)]
+#[derive(Debug, PartialOrd, PartialEq, Clone, Copy, EnumDisplay, TS, Serialize, Deserialize)]
 #[enum_display(case = "Pascal")]
 #[ts(export)]
 pub enum GameVersion {
@@ -46,7 +47,7 @@ impl Default for GameVersion {
     }
 }
 
-#[derive(Debug, PartialEq, Default, TS)]
+#[derive(Debug, PartialEq, Default, TS, Serialize, Deserialize)]
 #[ts(export)]
 pub struct MapFlags {
     pub flags: u32,
@@ -110,7 +111,7 @@ impl MapFlags {
     }
 }
 
-#[derive(Debug, PartialEq, TS)]
+#[derive(Debug, PartialEq, TS, Serialize, Deserialize)]
 #[ts(export)]
 pub struct GameVersionCode {
     pub major: u32,
@@ -119,7 +120,7 @@ pub struct GameVersionCode {
     pub build: u32,
 }
 
-#[derive(Debug, PartialEq, TS)]
+#[derive(Debug, PartialEq, TS, Serialize, Deserialize)]
 #[ts(export)]
 pub struct FogStyle {
     pub style: i32, // v >= 19
@@ -132,7 +133,7 @@ pub struct FogStyle {
     pub alpha_value: u8,
 }
 
-#[derive(Debug, PartialEq, Clone, PartialOrd, EnumDisplay, TS)]
+#[derive(Debug, PartialEq, Clone, PartialOrd, EnumDisplay, TS, Serialize, Deserialize)]
 #[enum_display(case = "Pascal")]
 #[ts(export)]
 pub enum RandomTablePositionType {
@@ -141,14 +142,14 @@ pub enum RandomTablePositionType {
     Item,
 }
 
-#[derive(Debug, PartialEq, TS)]
+#[derive(Debug, PartialEq, TS, Serialize, Deserialize)]
 #[ts(export)]
 pub struct RandomUnitSet {
     pub chance: u32,
     pub ids: Vec<String>,
 }
 
-#[derive(Debug, PartialEq, TS)]
+#[derive(Debug, PartialEq, TS, Serialize, Deserialize)]
 #[ts(export)]
 pub struct PlayerData {
     pub player_id: i32,
@@ -162,7 +163,7 @@ pub struct PlayerData {
     pub ally_high_priorities: i32,
 }
 
-#[derive(Debug, PartialEq, TS)]
+#[derive(Debug, PartialEq, TS, Serialize, Deserialize)]
 #[ts(export)]
 pub struct ForceData {
     pub flags: i32,
@@ -175,7 +176,7 @@ pub struct ForceData {
     pub name: String,
 }
 
-#[derive(Debug, PartialEq, TS)]
+#[derive(Debug, PartialEq, TS, Serialize, Deserialize)]
 #[ts(export)]
 pub struct UpgradeAvailability {
     pub player_availability: i32,
@@ -184,14 +185,14 @@ pub struct UpgradeAvailability {
     pub availability: i32,
 }
 
-#[derive(Debug, PartialEq, TS)]
+#[derive(Debug, PartialEq, TS, Serialize, Deserialize)]
 #[ts(export)]
 pub struct TechAvailability {
     pub player_availability: u32,
     pub tech_id: String,
 }
 
-#[derive(Debug, PartialEq, TS)]
+#[derive(Debug, PartialEq, TS, Serialize, Deserialize)]
 #[ts(export)]
 pub struct RandomUnitTable {
     pub id: i32,
@@ -200,13 +201,13 @@ pub struct RandomUnitTable {
     pub sets: Vec<RandomUnitSet>,
 }
 
-#[derive(Debug, PartialEq, TS)]
+#[derive(Debug, PartialEq, TS, Serialize, Deserialize)]
 #[ts(export)]
 pub struct RandomItemSet {
     pub items: Vec<(u32, String)>,
 }
 
-#[derive(Debug, PartialEq, TS)]
+#[derive(Debug, PartialEq, TS, Serialize, Deserialize)]
 #[ts(export)]
 pub struct RandomItemTable {
     pub id: i32,
@@ -214,7 +215,7 @@ pub struct RandomItemTable {
     pub sets: Vec<RandomItemSet>,
 }
 
-#[derive(Debug, PartialEq, Default, EnumDisplay, TS)]
+#[derive(Debug, PartialEq, Default, EnumDisplay, TS, Serialize, Deserialize)]
 #[enum_display(case = "Pascal")]
 #[ts(export)]
 pub enum Tileset {
@@ -240,7 +241,7 @@ pub enum Tileset {
     Known,
 }
 
-#[derive(Debug, PartialEq, Default, EnumDisplay, TS)]
+#[derive(Debug, PartialEq, Default, EnumDisplay, TS, Serialize, Deserialize)]
 #[enum_display(case = "Pascal")]
 #[ts(export)]
 pub enum MapSize {
@@ -274,7 +275,7 @@ impl MapSize {
     }
 }
 
-#[derive(Derivative, TS)]
+#[derive(Derivative, TS, Serialize, Deserialize)]
 #[derivative(Debug, Default, PartialEq)]
 #[ts(export)]
 pub struct W3iFile {
@@ -339,5 +340,15 @@ impl TryFrom<W3Raw> for W3iFile {
             Ok((_, w3i)) => Ok(w3i),
             Err(_) => Err("Failed to parse W3I file"),
         }
+    }
+}
+
+impl W3iFile {
+    pub fn update_with_wts(&self, wts: std::collections::HashMap<String, String>) -> Self {
+        let mut json = serde_json::to_string(&self).unwrap();
+        for (key, value) in wts {
+            json = json.replace(&key, &value);
+        }
+        serde_json::from_str(&json).unwrap()
     }
 }

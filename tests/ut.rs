@@ -114,4 +114,28 @@ mod tests {
         assert_eq!(w3i.map_width, 160);
         assert_eq!(w3i.map_height, 128);
     }
+
+    #[test]
+    fn test_w3i_serialization() {
+        let mut extractor = load_mpq(MAP_1.path);
+        let w3i = extractor
+            .extract(War3Format::W3i)
+            .expect("failed to extract w3i");
+
+        let w3i: W3iFile = w3i.try_into().unwrap();
+        let serialized = serde_json::to_string(&w3i).unwrap();
+        let deserialized: W3iFile = serde_json::from_str(&serialized).unwrap();
+        assert_eq!(w3i, deserialized);
+
+        dbg!(serialized);
+        let mut hash: std::collections::HashMap<String, String> = std::collections::HashMap::new();
+        hash.insert(
+            "TRIGSTR_003".to_string(),
+            "player_name's Tower Defense".to_string(),
+        );
+
+        let w3i_updated = w3i.update_with_wts(hash);
+        assert_eq!(w3i.map_name, "TRIGSTR_003");
+        assert_eq!(w3i_updated.map_name, "player_name's Tower Defense");
+    }
 }
