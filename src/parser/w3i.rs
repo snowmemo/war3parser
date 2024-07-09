@@ -7,6 +7,7 @@ use crate::extractor::W3Raw;
 use crate::parser::w3parser::W3Parser;
 
 use super::w3parser::get_bit_from_u32;
+use super::wts::WtsFile;
 
 #[derive(Debug, PartialOrd, PartialEq, Clone, Copy, EnumDisplay, TS, Serialize, Deserialize)]
 #[enum_display(case = "Pascal")]
@@ -344,11 +345,15 @@ impl TryFrom<W3Raw> for W3iFile {
 }
 
 impl W3iFile {
-    pub fn update_with_wts(&self, wts: std::collections::HashMap<String, String>) -> Self {
+    pub fn update_with_wts(&self, wts: &WtsFile) -> Self {
+        self.update_with_hashmap(&wts.trigger_strings)
+    }
+
+    pub fn update_with_hashmap(&self, hash: &std::collections::HashMap<String, String>) -> Self {
         let mut json = serde_json::to_string(&self).unwrap();
-        for (key, value) in wts {
-            json = json.replace(&key, &value);
-        }
+        hash.iter().for_each(|(key, value)| {
+            json = json.replace(key.as_str(), value.as_str());
+        });
         serde_json::from_str(&json).unwrap()
     }
 }

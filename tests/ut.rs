@@ -134,7 +134,7 @@ mod tests {
             "player_name's Tower Defense".to_string(),
         );
 
-        let w3i_updated = w3i.update_with_wts(hash);
+        let w3i_updated = w3i.update_with_hashmap(&hash);
         assert_eq!(w3i.map_name, "TRIGSTR_003");
         assert_eq!(w3i_updated.map_name, "player_name's Tower Defense");
     }

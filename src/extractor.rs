@@ -5,6 +5,7 @@ use mpq::Archive;
 pub enum War3Format {
     W3i,
     Wts,
+    Wtg,
     MapJ,
     MapPreview,
     MapMinimap,
@@ -16,6 +17,7 @@ impl War3Format {
         match self {
             War3Format::W3i => vec!["war3map.w3i"],
             War3Format::Wts => vec!["war3map.wts"],
+            War3Format::Wtg => vec!["war3map.wtg"],
             War3Format::MapJ => vec!["war3map.j", "Scripts/war3map.j", "scripts/war3map.j"],
             War3Format::MapPreview => vec!["war3mapPreview.tga", "war3mapPreview.blp"],
             War3Format::MapMinimap => vec!["war3mapMap.tga", "war3mapMap.blp"],
