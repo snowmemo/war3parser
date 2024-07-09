@@ -1,3 +1,6 @@
+/// globals constants and functions.
+pub mod globals;
+
 /// W3Parser trait and some helper functions.
 pub mod w3parser;
 

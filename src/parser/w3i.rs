@@ -1,11 +1,15 @@
+use std::collections::HashMap;
+
 use derivative::Derivative;
 use enum_display::EnumDisplay;
+use regex::Regex;
 use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 
 use crate::extractor::W3Raw;
 use crate::parser::w3parser::W3Parser;
 
+use super::globals::TRAGGER_STR_RE;
 use super::w3parser::get_bit_from_u32;
 use super::wts::WtsFile;
 
@@ -349,10 +353,32 @@ impl W3iFile {
         self.update_with_hashmap(&wts.trigger_strings)
     }
 
-    pub fn update_with_hashmap(&self, hash: &std::collections::HashMap<String, String>) -> Self {
+    /// Extract trigger strings from the W3I file
+    ///
+    /// returns a hashmap of original trigger strings and corresponding id
+    pub fn trigger_strings(&self) -> HashMap<String, i32> {
+        let re = Regex::new(TRAGGER_STR_RE).unwrap();
+        let json = serde_json::to_string(&self).unwrap();
+        let mut trigger_strings = HashMap::new();
+        for caps in re.captures_iter(json.as_str()) {
+            let original = caps.get(0).unwrap().as_str().to_string();
+            let id = caps.get(1).unwrap().as_str().to_string();
+            if let Ok(id) = id.parse::<i32>() {
+                if id > 0 {
+                    trigger_strings.insert(original, id);
+                }
+            };
+        }
+        trigger_strings
+    }
+
+    pub fn update_with_hashmap(&self, hash: &HashMap<i32, String>) -> Self {
         let mut json = serde_json::to_string(&self).unwrap();
-        hash.iter().for_each(|(key, value)| {
-            json = json.replace(key.as_str(), value.as_str());
+        let trigger_strings = self.trigger_strings();
+        let default = "".to_string();
+        trigger_strings.iter().for_each(|(original, id)| {
+            let replacement = hash.get(id).unwrap_or(&default);
+            json = json.replace(original, replacement);
         });
         serde_json::from_str(&json).unwrap()
     }

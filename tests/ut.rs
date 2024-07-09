@@ -28,7 +28,10 @@ pub fn load_mpq(filename: &str) -> Extractor {
 
 mod tests {
     use image::RgbaImage;
-    use war3parser::{parser::w3i::W3iFile, preview::ImageRaw};
+    use war3parser::{
+        parser::{w3i::W3iFile, wts::WtsFile},
+        preview::ImageRaw,
+    };
 
     use super::*;
 
@@ -127,15 +130,21 @@ mod tests {
         let deserialized: W3iFile = serde_json::from_str(&serialized).unwrap();
         assert_eq!(w3i, deserialized);
 
-        dbg!(serialized);
-        let mut hash: std::collections::HashMap<String, String> = std::collections::HashMap::new();
-        hash.insert(
-            "TRIGSTR_003".to_string(),
-            "player_name's Tower Defense".to_string(),
-        );
+        let wts: WtsFile = extractor
+            .extract(War3Format::Wts)
+            .unwrap()
+            .try_into()
+            .unwrap();
+        let w3i_hash = w3i.trigger_strings();
 
-        let w3i_updated = w3i.update_with_hashmap(&hash);
-        assert_eq!(w3i.map_name, "TRIGSTR_003");
-        assert_eq!(w3i_updated.map_name, "player_name's Tower Defense");
+        let original = "TRIGSTR_003";
+        let id = w3i_hash.get(original).unwrap();
+
+        assert_eq!(w3i.map_name, original);
+
+        let wts_str = wts.get_ts(*id).unwrap();
+        let w3i = w3i.update_with_wts(&wts);
+
+        assert_eq!(&w3i.map_name, wts_str);
     }
 }
