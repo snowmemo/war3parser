@@ -11,7 +11,7 @@ pub struct MapCase {
 }
 
 const MAP_1: MapCase = MapCase {
-    path: "misc/(6)BlizzardTD.w3x",
+    path: "../misc/(6)BlizzardTD.w3x",
     wts_present: true,
     w3i_present: true,
     mapj_present: true,
@@ -75,7 +75,7 @@ mod tests {
         let img = ImageRaw::from_w3raw(blp);
         let rgba: RgbaImage = img.try_into().expect("failed to convert to rgba");
 
-        let expected = image::open("misc/minimap.png")
+        let expected = image::open("../misc/minimap.png")
             .expect("failed to load image")
             .into_rgba8();
         assert_eq!(rgba.dimensions(), expected.dimensions());
@@ -95,7 +95,7 @@ mod tests {
         let img = ImageRaw::from_w3raw(tga);
         let rgba: RgbaImage = img.try_into().expect("failed to convert to rgba");
 
-        let expected: image::ImageBuffer<image::Rgba<u8>, Vec<u8>> = image::open("misc/slow.png")
+        let expected: image::ImageBuffer<image::Rgba<u8>, Vec<u8>> = image::open("../misc/slow.png")
             .expect("failed to load image")
             .into_rgba8();
         assert_eq!(rgba.dimensions(), expected.dimensions());
