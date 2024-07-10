@@ -55,6 +55,17 @@ mod tests {
     }
 
     #[test]
+    fn test_export_ts_bindings() {
+        let mut extractor = load_mpq(MAP_1.path);
+        let w3i = extractor
+            .extract(War3Format::W3i)
+            .expect("failed to extract w3i");
+        let w3i: W3iFile = w3i.try_into().unwrap();
+        w3i.export_ts_binding("target/bindings")
+            .expect("failed to export ts bindings");
+    }
+
+    #[test]
     fn test_extract_format() {
         let mut extractor = load_mpq(MAP_1.path);
         let wts = extractor
@@ -95,9 +106,10 @@ mod tests {
         let img = ImageRaw::from_w3raw(tga);
         let rgba: RgbaImage = img.try_into().expect("failed to convert to rgba");
 
-        let expected: image::ImageBuffer<image::Rgba<u8>, Vec<u8>> = image::open("../misc/slow.png")
-            .expect("failed to load image")
-            .into_rgba8();
+        let expected: image::ImageBuffer<image::Rgba<u8>, Vec<u8>> =
+            image::open("../misc/slow.png")
+                .expect("failed to load image")
+                .into_rgba8();
         assert_eq!(rgba.dimensions(), expected.dimensions());
         assert_eq!(
             rgba.pixels().collect::<Vec<_>>(),

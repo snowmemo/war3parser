@@ -129,7 +129,10 @@ mod tests {
         assert_eq!(result, expected);
 
         let output = format!("{}", result);
-        assert_eq!(output, "<span style=\"color: rgba(170, 187, 204, 255);\">Hello, World!</span>".to_string());
+        assert_eq!(
+            output,
+            "<span style=\"color: rgba(170, 187, 204, 255);\">Hello, World!</span>".to_string()
+        );
     }
 
     #[test]
