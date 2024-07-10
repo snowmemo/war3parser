@@ -25,8 +25,8 @@ impl Display for W3Str {
         if self.color {
             write!(
                 f,
-                "|c{:02X}{:02X}{:02X}{:02X}{}|r",
-                self.transparency, self.red, self.green, self.blue, self.content
+                "<span style=\"color: rgba({}, {}, {}, 255);\">{}</span>",
+                self.red, self.green, self.blue, self.content
             )
         } else {
             write!(f, "{}", self.content)
@@ -129,7 +129,7 @@ mod tests {
         assert_eq!(result, expected);
 
         let output = format!("{}", result);
-        assert_eq!(output, input);
+        assert_eq!(output, "<span style=\"color: rgba(170, 187, 204, 255);\">Hello, World!</span>".to_string());
     }
 
     #[test]
