@@ -1,3 +1,5 @@
+use std::fmt::{Display, Formatter};
+
 use nom::{
     bytes::complete::{tag_no_case, take, take_till1, take_until, take_while_m_n},
     combinator::{map_res, opt, peek},
@@ -16,6 +18,20 @@ pub struct W3Str {
     pub green: u8,
     pub blue: u8,
     pub content: String,
+}
+
+impl Display for W3Str {
+    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
+        if self.color {
+            write!(
+                f,
+                "|c{:02X}{:02X}{:02X}{:02X}{}|r",
+                self.transparency, self.red, self.green, self.blue, self.content
+            )
+        } else {
+            write!(f, "{}", self.content)
+        }
+    }
 }
 
 impl W3StrParser for W3Str {
@@ -111,6 +127,9 @@ mod tests {
         };
         let (_, result) = W3Str::parse(input).unwrap();
         assert_eq!(result, expected);
+
+        let output = format!("{}", result);
+        assert_eq!(output, input);
     }
 
     #[test]
@@ -126,6 +145,9 @@ mod tests {
         };
         let (_, result) = W3Str::parse(input).unwrap();
         assert_eq!(result, expected);
+
+        let output = format!("{}", result);
+        assert_eq!(output, input);
     }
 
     #[test]
