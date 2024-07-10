@@ -8,7 +8,10 @@ use nom::{
     IResult,
 };
 
-impl W3Parser for GameVersion {
+use super::w3str::parse_4char_string;
+use super::w3str::parse_cstring;
+
+impl W3BytesParser for GameVersion {
     fn parse(input: &[u8]) -> IResult<&[u8], Self> {
         let (input, version) = le_i32(input)?;
         let version = version as u8;
@@ -25,7 +28,7 @@ impl W3Parser for GameVersion {
     }
 }
 
-impl W3Parser for GameVersionCode {
+impl W3BytesParser for GameVersionCode {
     fn parse(input: &[u8]) -> IResult<&[u8], Self> {
         let (input, (major, minor, revision, build)) =
             tuple((le_u32, le_u32, le_u32, le_u32))(input)?;
@@ -42,7 +45,7 @@ impl W3Parser for GameVersionCode {
     }
 }
 
-impl W3Parser for FogStyle {
+impl W3BytesParser for FogStyle {
     fn parse(input: &[u8]) -> IResult<&[u8], Self> {
         let (
             input,
@@ -74,7 +77,7 @@ impl W3Parser for FogStyle {
     }
 }
 
-impl W3Parser for RandomTablePositionType {
+impl W3BytesParser for RandomTablePositionType {
     fn parse(input: &[u8]) -> IResult<&[u8], Self> {
         let (input, position_type) = le_i32(input)?;
 
@@ -90,7 +93,7 @@ impl W3Parser for RandomTablePositionType {
     }
 }
 
-impl W3Parser for PlayerData {
+impl W3BytesParser for PlayerData {
     fn parse(input: &[u8]) -> IResult<&[u8], Self> {
         let (
             input,
@@ -134,7 +137,7 @@ impl W3Parser for PlayerData {
     }
 }
 
-impl W3Parser for ForceData {
+impl W3BytesParser for ForceData {
     /// Parses a ForceData from a byte slice.
     fn parse(input: &[u8]) -> IResult<&[u8], Self> {
         let (input, flags) = le_i32(input)?;
@@ -161,7 +164,7 @@ impl W3Parser for ForceData {
     }
 }
 
-impl W3Parser for UpgradeAvailability {
+impl W3BytesParser for UpgradeAvailability {
     /// Parses an UpgradeAvailability from a byte slice.
     fn parse(input: &[u8]) -> IResult<&[u8], Self> {
         let (input, (player_availability, upgrade_id, upgrade_level, availability)) =
@@ -179,7 +182,7 @@ impl W3Parser for UpgradeAvailability {
     }
 }
 
-impl W3Parser for TechAvailability {
+impl W3BytesParser for TechAvailability {
     /// Parses a TechAvailability from a byte slice.
     fn parse(input: &[u8]) -> IResult<&[u8], Self> {
         let (input, (player_availability, tech_id)) = tuple((le_u32, parse_4char_string))(input)?;
@@ -194,7 +197,7 @@ impl W3Parser for TechAvailability {
     }
 }
 
-impl W3Parser for RandomUnitTable {
+impl W3BytesParser for RandomUnitTable {
     /// Parses a RandomUnitTable from a byte slice.
     /// Ref: <https://867380699.github.io/blog/2019/05/09/W3X_Files_Format#war3mapw3i:~:text=Random%20unit%20table%20format>
     fn parse(input: &[u8]) -> IResult<&[u8], Self> {
@@ -223,7 +226,7 @@ impl W3Parser for RandomUnitTable {
     }
 }
 
-impl W3Parser for RandomItemSet {
+impl W3BytesParser for RandomItemSet {
     /// Parses a RandomItemSet from a byte slice.
     fn parse(input: &[u8]) -> IResult<&[u8], Self> {
         let (input, count_items) = le_u32(input)?;
@@ -236,7 +239,7 @@ impl W3Parser for RandomItemSet {
     }
 }
 
-impl W3Parser for RandomItemTable {
+impl W3BytesParser for RandomItemTable {
     /// Parses a RandomItemTable from a byte slice.
     fn parse(input: &[u8]) -> IResult<&[u8], Self> {
         let (input, (id, name)) = tuple((le_i32, parse_cstring))(input)?;
@@ -247,7 +250,7 @@ impl W3Parser for RandomItemTable {
     }
 }
 
-impl W3Parser for Tileset {
+impl W3BytesParser for Tileset {
     fn parse(input: &[u8]) -> IResult<&[u8], Self> {
         let (input, tileset) = le_u8(input)?;
         let tileset = tileset as char;
@@ -276,7 +279,7 @@ impl W3Parser for Tileset {
     }
 }
 
-impl W3Parser for W3iFile {
+impl W3BytesParser for W3iFile {
     fn parse(input: &[u8]) -> IResult<&[u8], Self> {
         let (input, v) = GameVersion::parse(input)?;
         let (

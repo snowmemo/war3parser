@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 
 use crate::extractor::W3Raw;
-use crate::parser::w3parser::W3Parser;
+use crate::parser::w3parser::W3BytesParser;
 
 use super::globals::TRAGGER_STR_RE;
 use super::w3parser::get_bit_from_u32;
@@ -362,7 +362,10 @@ impl W3iFile {
         let mut trigger_strings = HashMap::new();
         for caps in re.captures_iter(json.as_str()) {
             let original = caps.get(0).unwrap().as_str().to_string();
-            let id = caps.get(1).unwrap().as_str().to_string();
+            let id = match caps.get(1) {
+                Some(id) => id.as_str(),
+                None => "0",
+            };
             if let Ok(id) = id.parse::<i32>() {
                 if id > 0 {
                     trigger_strings.insert(original, id);

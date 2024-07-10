@@ -4,6 +4,9 @@ pub mod globals;
 /// W3Parser trait and some helper functions.
 pub mod w3parser;
 
+/// W3 string type parser.
+pub mod w3str;
+
 /// W3I file structure.
 ///
 /// Code inspired by the following sources:
@@ -18,4 +21,4 @@ pub mod w3i;
 pub mod wts;
 
 /// W3iParser implementation.
-pub mod w3i_parser;
+pub mod w3i_impl;
