@@ -1,0 +1,29 @@
+{
+  "name": "war3parser-wasm",
+  "version": "0.1.0",
+  "main": "dist/node/index.js",
+  "browser": "dist/web/index.js",
+  "repository": "https://github.com/magicwenli/war3parser",
+  "author": "magicwenli",
+  "license": "MIT",
+  "scripts": {
+    "wasm-pack:dev": "wasm-pack build --out-dir js/pkg",
+    "wasm-pack:web": "wasm-pack build --release --out-dir dist/web/pkg && rm dist/web/pkg/.gitignore",
+    "wasm-pack:node": "wasm-pack build --release --out-dir dist/node/pkg --target nodejs  && rm dist/node/pkg/.gitignore",
+    "wasm-pack": "run-s wasm-pack:*",
+    "tsc:web": "tsc -p tsconfig.web.json --sourcemap",
+    "tsc:node": "tsc -p tsconfig.node.json --sourcemap",
+    "tsc": "run-s tsc:*",
+    "test": "npm run build && tsc && jest",
+    "jest": "tsc && jest",
+    "build": "run-s tsrs copy:bindings wasm-pack tsc",
+    "serve": "webpack-dev-server --open --config webpack.dev.js",
+    "copy": "cpy 'dist/node/pkg/package.json'  'dist/web/pkg'",
+    "tsrs": "cd ../ && cargo test -- --test-threads=1",
+    "copy:bindings": "cpy '../docx-core/bindings' './js/json'",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "npm-run-all": "^4.1.5"
+  }
+}
