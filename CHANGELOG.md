@@ -1,3 +1,22 @@
+## 0.2.2 (2024-07-11)
+
+### Feat
+
+- **wasm**: add extractor test
+- **cli**: add war3parser-cli tool to extract MPQ file
+- **wasm**: TODO: wasm
+- **wasm**: init wasm project
+- **parser**: add w3 color style string parser
+- **parser**: enhanced w3i update_with_hashmap function
+- **parser**: add wts parser and w3i update function
+- **parser**: add update_with_wts for W3iFile
+
+### Refactor
+
+- **bindgen**: remove bindgen function, use default test gen method
+- **parser**: not export bindings at compile time
+- change src structure and create war3parser-wasm project
+
 ## 0.2.1 (2024-07-08)
 
 ### Feat
