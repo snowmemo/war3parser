@@ -55,17 +55,6 @@ mod tests {
     }
 
     #[test]
-    fn test_export_ts_bindings() {
-        let mut extractor = load_mpq(MAP_1.path);
-        let w3i = extractor
-            .extract(War3Format::W3i)
-            .expect("failed to extract w3i");
-        let w3i: W3iFile = w3i.try_into().unwrap();
-        w3i.export_ts_binding("target/bindings")
-            .expect("failed to export ts bindings");
-    }
-
-    #[test]
     fn test_extract_format() {
         let mut extractor = load_mpq(MAP_1.path);
         let wts = extractor

@@ -4,7 +4,7 @@ use derivative::Derivative;
 use enum_display::EnumDisplay;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
-use ts_rs::{ExportError, TS};
+use ts_rs::TS;
 
 use crate::extractor::W3Raw;
 use crate::parser::w3parser::W3BytesParser;
@@ -14,6 +14,7 @@ use super::w3parser::get_bit_from_u32;
 use super::wts::WtsFile;
 
 #[derive(Debug, PartialOrd, PartialEq, Clone, Copy, EnumDisplay, TS, Serialize, Deserialize)]
+#[ts(export)]
 #[enum_display(case = "Pascal")]
 pub enum GameVersion {
     RoC(u8),
@@ -52,6 +53,7 @@ impl Default for GameVersion {
 }
 
 #[derive(Debug, PartialEq, Default, TS, Serialize, Deserialize)]
+#[ts(export)]
 pub struct MapFlags {
     pub flags: u32,
     pub hide_minimap_on_preview_screens: bool,
@@ -115,6 +117,7 @@ impl MapFlags {
 }
 
 #[derive(Debug, PartialEq, TS, Serialize, Deserialize)]
+#[ts(export)]
 pub struct GameVersionCode {
     pub major: u32,
     pub minor: u32,
@@ -123,6 +126,7 @@ pub struct GameVersionCode {
 }
 
 #[derive(Debug, PartialEq, TS, Serialize, Deserialize)]
+#[ts(export)]
 pub struct FogStyle {
     pub style: i32, // v >= 19
     pub z_height_start: f32,
@@ -135,6 +139,7 @@ pub struct FogStyle {
 }
 
 #[derive(Debug, PartialEq, Clone, PartialOrd, EnumDisplay, TS, Serialize, Deserialize)]
+#[ts(export)]
 #[enum_display(case = "Pascal")]
 pub enum RandomTablePositionType {
     Unit,
@@ -143,12 +148,14 @@ pub enum RandomTablePositionType {
 }
 
 #[derive(Debug, PartialEq, TS, Serialize, Deserialize)]
+#[ts(export)]
 pub struct RandomUnitSet {
     pub chance: u32,
     pub ids: Vec<String>,
 }
 
 #[derive(Debug, PartialEq, TS, Serialize, Deserialize)]
+#[ts(export)]
 pub struct PlayerData {
     pub player_id: i32,
     pub player_type: i32,
@@ -162,6 +169,7 @@ pub struct PlayerData {
 }
 
 #[derive(Debug, PartialEq, TS, Serialize, Deserialize)]
+#[ts(export)]
 pub struct ForceData {
     pub flags: i32,
     pub allied: bool,
@@ -174,6 +182,7 @@ pub struct ForceData {
 }
 
 #[derive(Debug, PartialEq, TS, Serialize, Deserialize)]
+#[ts(export)]
 pub struct UpgradeAvailability {
     pub player_availability: i32,
     pub upgrade_id: String,
@@ -182,12 +191,14 @@ pub struct UpgradeAvailability {
 }
 
 #[derive(Debug, PartialEq, TS, Serialize, Deserialize)]
+#[ts(export)]
 pub struct TechAvailability {
     pub player_availability: u32,
     pub tech_id: String,
 }
 
 #[derive(Debug, PartialEq, TS, Serialize, Deserialize)]
+#[ts(export)]
 pub struct RandomUnitTable {
     pub id: i32,
     pub name: String,
@@ -196,11 +207,13 @@ pub struct RandomUnitTable {
 }
 
 #[derive(Debug, PartialEq, TS, Serialize, Deserialize)]
+#[ts(export)]
 pub struct RandomItemSet {
     pub items: Vec<(u32, String)>,
 }
 
 #[derive(Debug, PartialEq, TS, Serialize, Deserialize)]
+#[ts(export)]
 pub struct RandomItemTable {
     pub id: i32,
     pub name: String,
@@ -208,6 +221,7 @@ pub struct RandomItemTable {
 }
 
 #[derive(Debug, PartialEq, Default, EnumDisplay, TS, Serialize, Deserialize)]
+#[ts(export)]
 #[enum_display(case = "Pascal")]
 pub enum Tileset {
     #[default]
@@ -233,6 +247,7 @@ pub enum Tileset {
 }
 
 #[derive(Debug, PartialEq, Default, EnumDisplay, TS, Serialize, Deserialize)]
+#[ts(export)]
 #[enum_display(case = "Pascal")]
 pub enum MapSize {
     #[default]
@@ -368,9 +383,5 @@ impl W3iFile {
             json = json.replace(original, replacement);
         });
         serde_json::from_str(&json).unwrap()
-    }
-
-    pub fn export_ts_binding(&self, path: &str) -> Result<(), ExportError> {
-        <Self as ts_rs::TS>::export_all_to(path)
     }
 }

@@ -1,7 +1,10 @@
 use std::fmt::{Display, Formatter};
 
 use mpq::Archive;
+use ts_rs::TS;
 
+#[derive(Debug, TS)]
+#[ts(export)]
 pub enum War3Format {
     W3i,
     Wts,
@@ -10,6 +13,20 @@ pub enum War3Format {
     MapPreview,
     MapMinimap,
     Listfile,
+}
+
+impl From<&str> for War3Format {
+    fn from(s: &str) -> Self {
+        match s {
+            "w3i" => War3Format::W3i,
+            "wts" => War3Format::Wts,
+            "wtg" => War3Format::Wtg,
+            "map.j" => War3Format::MapJ,
+            "mapPreview" => War3Format::MapPreview,
+            "mapMinimap" => War3Format::MapMinimap,
+            _ => War3Format::Listfile,
+        }
+    }
 }
 
 impl War3Format {

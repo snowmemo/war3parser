@@ -787,7 +787,6 @@ checksum = "06abde3611657adf66d383f00b093d7faecc7fa57071cce2578660c9f1010821"
 name = "war3parser"
 version = "0.2.1"
 dependencies = [
- "clap",
  "derivative",
  "enum-display",
  "image",
