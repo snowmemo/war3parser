@@ -11,6 +11,14 @@ pub struct W3Raw(extractor::W3Raw);
 pub struct War3Format(extractor::War3Format);
 
 #[wasm_bindgen]
+impl War3Format {
+    #[wasm_bindgen(constructor)]
+    pub fn new(name: &str) -> War3Format {
+        War3Format(extractor::War3Format::from(name))
+    }
+}
+
+#[wasm_bindgen]
 pub fn create_extractor(buf: &[u8]) -> Extractor {
     use std::panic;
     panic::set_hook(Box::new(console_error_panic_hook::hook));
