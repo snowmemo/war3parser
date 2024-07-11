@@ -6,6 +6,5 @@ members = [
     "war3parser-wasm",
 ]
 
-[package]
-name = "war3parser"
+[workspace.package]
 version = "0.2.2"

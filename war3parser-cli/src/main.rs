@@ -46,7 +46,7 @@ fn main() {
             file_name,
             out_dir,
         } => {
-            let buf = std::fs::read(&map_path).expect("Failed to read map");
+            let buf = std::fs::read(map_path).expect("Failed to read map");
             let mut map = Extractor::new(&buf);
             let w3raw = map
                 .extract_with_filename(&file_name)
