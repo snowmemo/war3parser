@@ -16,7 +16,7 @@
     "tsc": "run-s tsc:*",
     "test": "npm run build && tsc && jest",
     "jest": "tsc && jest",
-    "build": "run-s tsrs copy:bindings wasm-pack tsc",
+    "build": "run-s tsrs wasm-pack tsc",
     "serve": "webpack-dev-server --open --config webpack.dev.js",
     "copy": "cpy 'dist/node/pkg/package.json'  'dist/web/pkg'",
     "tsrs": "cd ../ && cargo test -- --test-threads=1",
@@ -25,5 +25,10 @@
   },
   "devDependencies": {
     "npm-run-all": "^4.1.5"
+  },
+  "dependencies": {
+    "jest": "^29.7.0",
+    "run-s": "^0.0.0",
+    "typescript": "^5.5.3"
   }
 }
