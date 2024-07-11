@@ -5,3 +5,7 @@ members = [
     "war3parser-cli",
     "war3parser-wasm",
 ]
+
+[package]
+name = "war3parser"
+version = "0.2.1"
