@@ -2,9 +2,11 @@ use std::fmt::{Display, Formatter};
 
 use mpq::Archive;
 use ts_rs::TS;
+use wasm_bindgen::prelude::wasm_bindgen;
 
 #[derive(Debug, TS)]
 #[ts(export)]
+#[wasm_bindgen]
 pub enum War3Format {
     W3i,
     Wts,

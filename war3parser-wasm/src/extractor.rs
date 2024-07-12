@@ -1,4 +1,4 @@
-use war3parser::extractor;
+use war3parser::extractor::{self, War3Format};
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
@@ -6,17 +6,6 @@ pub struct Extractor(extractor::Extractor);
 
 #[wasm_bindgen]
 pub struct W3Raw(extractor::W3Raw);
-
-#[wasm_bindgen]
-pub struct War3Format(extractor::War3Format);
-
-#[wasm_bindgen]
-impl War3Format {
-    #[wasm_bindgen(constructor)]
-    pub fn new(name: &str) -> War3Format {
-        War3Format(extractor::War3Format::from(name))
-    }
-}
 
 #[wasm_bindgen]
 pub fn create_extractor(buf: &[u8]) -> Extractor {
@@ -32,7 +21,7 @@ impl Extractor {
     }
 
     pub fn extract(&mut self, format: War3Format) -> Option<W3Raw> {
-        self.0.extract(format.0).map(W3Raw)
+        self.0.extract(format).map(W3Raw)
     }
 }
 
