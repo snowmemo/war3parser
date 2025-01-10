@@ -1,5 +1,4 @@
 use derivative::Derivative;
-use enum_display::EnumDisplay;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -123,9 +122,8 @@ pub struct FogStyle {
     pub alpha_value: u8,
 }
 
-#[derive(Debug, PartialEq, Clone, PartialOrd, EnumDisplay, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Clone, PartialOrd, Serialize, Deserialize)]
 #[wasm_bindgen]
-#[enum_display(case = "Pascal")]
 pub enum RandomTablePositionType {
     Unit,
     Building,
@@ -212,9 +210,8 @@ pub struct RandomItemTable {
     pub sets: Vec<RandomItemSet>,
 }
 
-#[derive(Debug, PartialEq, Default, EnumDisplay, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Default, Serialize, Deserialize)]
 #[wasm_bindgen]
-#[enum_display(case = "Pascal")]
 pub enum Tileset {
     #[default]
     Ashenvale,
@@ -238,7 +235,7 @@ pub enum Tileset {
     Known,
 }
 
-#[derive(Debug, PartialEq, Default, EnumDisplay, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Default, Serialize, Deserialize)]
 #[wasm_bindgen]
 pub enum MapSize {
     #[default]
