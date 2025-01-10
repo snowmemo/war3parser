@@ -2,8 +2,7 @@
 resolver = "2"
 members = [
     "war3parser",
-    "war3parser-cli",
-    "war3parser-wasm",
+    "war3parser-cli"
 ]
 
 [workspace.package]

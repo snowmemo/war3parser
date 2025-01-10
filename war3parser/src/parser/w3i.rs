@@ -1,10 +1,9 @@
-use std::collections::HashMap;
-
 use derivative::Derivative;
 use enum_display::EnumDisplay;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
-use ts_rs::TS;
+use std::collections::HashMap;
+use wasm_bindgen::prelude::wasm_bindgen;
 
 use crate::extractor::W3Raw;
 use crate::parser::w3parser::W3BytesParser;
@@ -13,47 +12,33 @@ use super::globals::TRAGGER_STR_RE;
 use super::w3parser::get_bit_from_u32;
 use super::wts::WtsFile;
 
-#[derive(Debug, PartialOrd, PartialEq, Clone, Copy, EnumDisplay, TS, Serialize, Deserialize)]
-#[ts(export)]
-#[enum_display(case = "Pascal")]
-pub enum GameVersion {
-    RoC(u8),
-    TFT(u8),
-    Reforged(u8),
-    Known(u8),
+#[derive(Debug, PartialOrd, PartialEq, Clone, Copy, Serialize, Deserialize)]
+#[wasm_bindgen]
+pub enum GameVersionType {
+    RoC,
+    TFT,
+    Reforged,
+    Known,
 }
 
-impl AsRef<u8> for GameVersion {
-    fn as_ref(&self) -> &u8 {
-        match self {
-            GameVersion::RoC(version) => version,
-            GameVersion::TFT(version) => version,
-            GameVersion::Reforged(version) => version,
-            GameVersion::Known(version) => version,
-        }
-    }
-}
-
-impl PartialOrd<u8> for GameVersion {
-    fn partial_cmp(&self, other: &u8) -> Option<std::cmp::Ordering> {
-        self.as_ref().partial_cmp(other)
-    }
-}
-
-impl PartialEq<u8> for GameVersion {
-    fn eq(&self, other: &u8) -> bool {
-        self.as_ref() == other
-    }
+#[derive(Debug, PartialOrd, PartialEq, Clone, Copy, Serialize, Deserialize)]
+#[wasm_bindgen]
+pub struct GameVersion {
+    pub version: GameVersionType,
+    pub version_number: u8,
 }
 
 impl Default for GameVersion {
     fn default() -> Self {
-        GameVersion::TFT(25)
+        GameVersion {
+            version: GameVersionType::TFT,
+            version_number: 25,
+        }
     }
 }
 
-#[derive(Debug, PartialEq, Default, TS, Serialize, Deserialize)]
-#[ts(export)]
+#[derive(Debug, PartialEq, Default, Serialize, Deserialize)]
+#[wasm_bindgen]
 pub struct MapFlags {
     pub flags: u32,
     pub hide_minimap_on_preview_screens: bool,
@@ -116,8 +101,8 @@ impl MapFlags {
     }
 }
 
-#[derive(Debug, PartialEq, TS, Serialize, Deserialize)]
-#[ts(export)]
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[wasm_bindgen]
 pub struct GameVersionCode {
     pub major: u32,
     pub minor: u32,
@@ -125,8 +110,8 @@ pub struct GameVersionCode {
     pub build: u32,
 }
 
-#[derive(Debug, PartialEq, TS, Serialize, Deserialize)]
-#[ts(export)]
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[wasm_bindgen]
 pub struct FogStyle {
     pub style: i32, // v >= 19
     pub z_height_start: f32,
@@ -138,8 +123,8 @@ pub struct FogStyle {
     pub alpha_value: u8,
 }
 
-#[derive(Debug, PartialEq, Clone, PartialOrd, EnumDisplay, TS, Serialize, Deserialize)]
-#[ts(export)]
+#[derive(Debug, PartialEq, Clone, PartialOrd, EnumDisplay, Serialize, Deserialize)]
+#[wasm_bindgen]
 #[enum_display(case = "Pascal")]
 pub enum RandomTablePositionType {
     Unit,
@@ -147,15 +132,15 @@ pub enum RandomTablePositionType {
     Item,
 }
 
-#[derive(Debug, PartialEq, TS, Serialize, Deserialize)]
-#[ts(export)]
+#[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
+#[wasm_bindgen(getter_with_clone)]
 pub struct RandomUnitSet {
     pub chance: u32,
     pub ids: Vec<String>,
 }
 
-#[derive(Debug, PartialEq, TS, Serialize, Deserialize)]
-#[ts(export)]
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[wasm_bindgen(getter_with_clone)]
 pub struct PlayerData {
     pub player_id: i32,
     pub player_type: i32,
@@ -168,8 +153,8 @@ pub struct PlayerData {
     pub ally_high_priorities: i32,
 }
 
-#[derive(Debug, PartialEq, TS, Serialize, Deserialize)]
-#[ts(export)]
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[wasm_bindgen(getter_with_clone)]
 pub struct ForceData {
     pub flags: i32,
     pub allied: bool,
@@ -181,8 +166,8 @@ pub struct ForceData {
     pub name: String,
 }
 
-#[derive(Debug, PartialEq, TS, Serialize, Deserialize)]
-#[ts(export)]
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[wasm_bindgen(getter_with_clone)]
 pub struct UpgradeAvailability {
     pub player_availability: i32,
     pub upgrade_id: String,
@@ -190,15 +175,15 @@ pub struct UpgradeAvailability {
     pub availability: i32,
 }
 
-#[derive(Debug, PartialEq, TS, Serialize, Deserialize)]
-#[ts(export)]
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[wasm_bindgen(getter_with_clone)]
 pub struct TechAvailability {
     pub player_availability: u32,
     pub tech_id: String,
 }
 
-#[derive(Debug, PartialEq, TS, Serialize, Deserialize)]
-#[ts(export)]
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[wasm_bindgen(getter_with_clone)]
 pub struct RandomUnitTable {
     pub id: i32,
     pub name: String,
@@ -206,22 +191,29 @@ pub struct RandomUnitTable {
     pub sets: Vec<RandomUnitSet>,
 }
 
-#[derive(Debug, PartialEq, TS, Serialize, Deserialize)]
-#[ts(export)]
-pub struct RandomItemSet {
-    pub items: Vec<(u32, String)>,
+#[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
+#[wasm_bindgen(getter_with_clone)]
+pub struct RandomItemSetValue {
+    pub chance: u32,
+    pub item_id: String,
 }
 
-#[derive(Debug, PartialEq, TS, Serialize, Deserialize)]
-#[ts(export)]
+#[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
+#[wasm_bindgen(getter_with_clone)]
+pub struct RandomItemSet {
+    pub items: Vec<RandomItemSetValue>,
+}
+
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[wasm_bindgen(getter_with_clone)]
 pub struct RandomItemTable {
     pub id: i32,
     pub name: String,
     pub sets: Vec<RandomItemSet>,
 }
 
-#[derive(Debug, PartialEq, Default, EnumDisplay, TS, Serialize, Deserialize)]
-#[ts(export)]
+#[derive(Debug, PartialEq, Default, EnumDisplay, Serialize, Deserialize)]
+#[wasm_bindgen]
 #[enum_display(case = "Pascal")]
 pub enum Tileset {
     #[default]
@@ -246,9 +238,8 @@ pub enum Tileset {
     Known,
 }
 
-#[derive(Debug, PartialEq, Default, EnumDisplay, TS, Serialize, Deserialize)]
-#[ts(export)]
-#[enum_display(case = "Pascal")]
+#[derive(Debug, PartialEq, Default, EnumDisplay, Serialize, Deserialize)]
+#[wasm_bindgen]
 pub enum MapSize {
     #[default]
     Tiny,
@@ -280,7 +271,7 @@ impl MapSize {
     }
 }
 
-#[derive(Derivative, TS, Serialize, Deserialize)]
+#[derive(Derivative, Serialize, Deserialize)]
 #[derivative(Debug, Default, PartialEq)]
 pub struct W3iFile {
     pub version: GameVersion,

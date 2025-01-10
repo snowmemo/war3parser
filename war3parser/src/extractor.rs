@@ -56,6 +56,7 @@ impl War3Format {
 }
 
 #[derive(Debug)]
+#[wasm_bindgen(getter_with_clone)]
 pub struct W3Raw {
     pub filename: String,
     pub data: Vec<u8>,

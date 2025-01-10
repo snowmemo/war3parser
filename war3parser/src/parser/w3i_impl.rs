@@ -17,9 +17,27 @@ impl W3BytesParser for GameVersion {
         let version = version as u8;
 
         match version {
-            8 | 10 | 11 | 15 | 18 => Ok((input, GameVersion::RoC(version))),
-            23..=27 => Ok((input, GameVersion::TFT(version))),
-            28 | 31 => Ok((input, GameVersion::Reforged(version))),
+            8 | 10 | 11 | 15 | 18 => Ok((
+                input,
+                GameVersion {
+                    version: GameVersionType::RoC,
+                    version_number: version,
+                },
+            )),
+            23..=27 => Ok((
+                input,
+                GameVersion {
+                    version: GameVersionType::TFT,
+                    version_number: version,
+                },
+            )),
+            28 | 31 => Ok((
+                input,
+                GameVersion {
+                    version: GameVersionType::Reforged,
+                    version_number: version,
+                },
+            )),
             _ => Err(nom::Err::Error(nom::error::Error::new(
                 input,
                 nom::error::ErrorKind::Fail,
@@ -235,7 +253,18 @@ impl W3BytesParser for RandomItemSet {
             count_items as usize,
         )(input)?;
 
-        Ok((input, RandomItemSet { items }))
+        Ok((
+            input,
+            RandomItemSet {
+                items: items
+                    .into_iter()
+                    .map(|(chance, id)| RandomItemSetValue {
+                        chance,
+                        item_id: id,
+                    })
+                    .collect(),
+            },
+        ))
     }
 }
 
@@ -299,9 +328,9 @@ impl W3BytesParser for W3iFile {
                 flags,
             ),
         ) = tuple((
-            cond(v > 16, le_i32),
-            cond(v > 16, le_i32),
-            cond(v > 32, GameVersionCode::parse),
+            cond(v.version_number > 16, le_i32),
+            cond(v.version_number > 16, le_i32),
+            cond(v.version_number > 32, GameVersionCode::parse),
             parse_cstring,
             parse_cstring,
             parse_cstring,
@@ -331,12 +360,18 @@ impl W3BytesParser for W3iFile {
             ),
         ) = tuple((
             le_i32,
-            cond(v != 18 && v != 19, parse_cstring),
+            cond(
+                v.version_number != 18 && v.version_number != 19,
+                parse_cstring,
+            ),
             parse_cstring,
             parse_cstring,
             parse_cstring,
-            cond(v >= 17, le_i32),
-            cond(v != 18 && v != 19, parse_cstring),
+            cond(v.version_number >= 17, le_i32),
+            cond(
+                v.version_number != 18 && v.version_number != 19,
+                parse_cstring,
+            ),
             parse_cstring,
             parse_cstring,
             parse_cstring,
@@ -355,21 +390,21 @@ impl W3BytesParser for W3iFile {
                 custom_water_alpha_tint,
             ),
         ) = tuple((
-            cond(v >= 19, FogStyle::parse),
-            cond(v >= 21, le_i32),
-            cond(v >= 22, parse_cstring),
-            cond(v >= 23, le_u8),
-            cond(v >= 25, le_u8),
-            cond(v >= 25, le_u8),
-            cond(v >= 25, le_u8),
-            cond(v >= 25, le_u8),
+            cond(v.version_number >= 19, FogStyle::parse),
+            cond(v.version_number >= 21, le_i32),
+            cond(v.version_number >= 22, parse_cstring),
+            cond(v.version_number >= 23, le_u8),
+            cond(v.version_number >= 25, le_u8),
+            cond(v.version_number >= 25, le_u8),
+            cond(v.version_number >= 25, le_u8),
+            cond(v.version_number >= 25, le_u8),
         ))(input)?;
 
         let (input, (script_language, supported_graphics_modes, game_data_version)) =
             tuple((
-                cond(v >= 28, le_u32),
-                cond(v >= 29, le_i32),
-                cond(v >= 30, le_u32),
+                cond(v.version_number >= 28, le_u32),
+                cond(v.version_number >= 29, le_i32),
+                cond(v.version_number >= 30, le_u32),
             ))(input)?;
 
         let (input, count_players) = le_i32(input)?;
@@ -383,7 +418,7 @@ impl W3BytesParser for W3iFile {
         let (input, count_random_unit_tables) = le_i32(input)?;
         let (input, random_unit_tables) =
             count(RandomUnitTable::parse, count_random_unit_tables as usize)(input)?;
-        let (input, count_random_item_tables) = cond(v >= 24, le_u32)(input)?;
+        let (input, count_random_item_tables) = cond(v.version_number >= 24, le_u32)(input)?;
         let (input, random_item_tables) = cond(
             count_random_item_tables.is_some(),
             count(
@@ -392,7 +427,8 @@ impl W3BytesParser for W3iFile {
             ),
         )(input)?;
 
-        let (input, script_language2) = cond(v == 26 || v == 27, le_u32)(input)?;
+        let (input, script_language2) =
+            cond(v.version_number == 26 || v.version_number == 27, le_u32)(input)?;
 
         let flags = MapFlags::new(flags);
         let map_width =
