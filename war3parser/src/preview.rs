@@ -1,17 +1,29 @@
 use image::{codecs::tga::TgaDecoder, DynamicImage, RgbaImage};
 use image_blp::{convert::blp_to_image, parser::load_blp_from_buf};
+use wasm_bindgen::prelude::wasm_bindgen;
 
 use crate::extractor::W3Raw;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
+#[wasm_bindgen]
 pub enum ImageType {
     BLP,
     TGA,
 }
 
+#[derive(Debug, Clone)]
+#[wasm_bindgen(getter_with_clone)]
 pub struct ImageRaw {
     pub data: Vec<u8>,
     pub image_type: ImageType,
+}
+
+#[derive(Debug, Clone)]
+#[wasm_bindgen(getter_with_clone)]
+pub struct RgbaImageRaw {
+    pub data: Vec<u8>,
+    pub width: u32,
+    pub height: u32,
 }
 
 impl ImageRaw {
@@ -55,6 +67,16 @@ impl TryInto<RgbaImage> for ImageRaw {
                 },
                 Err(_) => Err("Failed to load TGA image"),
             }
+        }
+    }
+}
+
+impl From<RgbaImage> for RgbaImageRaw {
+    fn from(value: RgbaImage) -> Self {
+        RgbaImageRaw {
+            data: value.to_vec(),
+            width: value.width(),
+            height: value.height(),
         }
     }
 }

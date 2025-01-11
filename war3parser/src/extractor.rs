@@ -1,9 +1,13 @@
 use std::fmt::{Display, Formatter};
 
+use image::RgbaImage;
 use mpq::Archive;
 use wasm_bindgen::prelude::wasm_bindgen;
 
-use crate::parser::{w3i::W3iFile, wts::WtsFile};
+use crate::{
+    parser::{w3i::W3iFile, wts::WtsFile},
+    preview::{ImageRaw, RgbaImageRaw},
+};
 
 /// Pre-defined filenames of MPQ files
 #[derive(Debug)]
@@ -84,6 +88,14 @@ impl W3Raw {
     }
 }
 
+#[derive(Debug, Clone)]
+#[wasm_bindgen(getter_with_clone)]
+pub struct MapInfo {
+    pub w3i: Option<W3iFile>,
+    pub minimap: Option<RgbaImageRaw>,
+    pub preview: Option<RgbaImageRaw>,
+}
+
 /// Extractor of MPQ files
 #[wasm_bindgen]
 pub struct Extractor {
@@ -137,12 +149,32 @@ impl Extractor {
         }
     }
 
-    pub fn map_info(&mut self) -> Option<W3iFile> {
-        let w3i = self.extract(War3Format::W3i).unwrap();
-        let w3i_file = W3iFile::try_from_w3raw(w3i).unwrap();
-        let wts = self.extract(War3Format::Wts).unwrap();
-        let wts_file: WtsFile = wts.try_into().unwrap();
-        let w3i_file = w3i_file.update_with_wts(&wts_file);
-        Some(w3i_file)
+    pub fn map_info(&mut self) -> MapInfo {
+        let w3i_file = self
+            .extract(War3Format::W3i)
+            .and_then(|w3i| W3iFile::try_from_w3raw(w3i))
+            .and_then(|w3i| {
+                self.extract(War3Format::Wts)
+                    .and_then(|wts| WtsFile::try_from(wts).ok())
+                    .map(|wts| w3i.update_with_wts(&wts))
+            });
+
+        let minimap_rgba_raw = self
+            .extract(War3Format::MapMinimap)
+            .map(|minimap| ImageRaw::from_w3raw(minimap))
+            .and_then(|minimap_file| minimap_file.try_into().ok())
+            .map(|minimap_rgba: RgbaImage| RgbaImageRaw::from(minimap_rgba));
+
+        let preview_rgba_raw = self
+            .extract(War3Format::MapPreview)
+            .map(|preview| ImageRaw::from_w3raw(preview))
+            .and_then(|preview_file| preview_file.try_into().ok())
+            .map(|preview_rgba: RgbaImage| RgbaImageRaw::from(preview_rgba));
+
+        MapInfo {
+            w3i: w3i_file,
+            minimap: minimap_rgba_raw,
+            preview: preview_rgba_raw,
+        }
     }
 }
