@@ -6,11 +6,9 @@ use crate::extractor::W3Raw;
 
 use super::globals::STRINGS_RE;
 
-type Trigstr = String;
-
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct WtsFile {
-    pub trigger_strings: HashMap<i32, Trigstr>,
+    pub trigger_strings: HashMap<i32, String>,
 }
 
 impl TryFrom<W3Raw> for WtsFile {
@@ -40,7 +38,7 @@ impl TryFrom<W3Raw> for WtsFile {
 }
 
 impl WtsFile {
-    pub fn get_ts(&self, id: i32) -> Option<&Trigstr> {
+    pub fn get_ts(&self, id: i32) -> Option<&String> {
         self.trigger_strings.get(&id)
     }
 }

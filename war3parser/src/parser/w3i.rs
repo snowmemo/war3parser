@@ -36,7 +36,7 @@ impl Default for GameVersion {
     }
 }
 
-#[derive(Debug, PartialEq, Default, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Default, Serialize, Deserialize, Clone)]
 #[wasm_bindgen]
 pub struct MapFlags {
     pub flags: u32,
@@ -100,7 +100,7 @@ impl MapFlags {
     }
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
 #[wasm_bindgen]
 pub struct GameVersionCode {
     pub major: u32,
@@ -109,7 +109,7 @@ pub struct GameVersionCode {
     pub build: u32,
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
 #[wasm_bindgen]
 pub struct FogStyle {
     pub style: i32, // v >= 19
@@ -137,7 +137,7 @@ pub struct RandomUnitSet {
     pub ids: Vec<String>,
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
 #[wasm_bindgen(getter_with_clone)]
 pub struct PlayerData {
     pub player_id: i32,
@@ -151,7 +151,7 @@ pub struct PlayerData {
     pub ally_high_priorities: i32,
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
 #[wasm_bindgen(getter_with_clone)]
 pub struct ForceData {
     pub flags: i32,
@@ -164,7 +164,7 @@ pub struct ForceData {
     pub name: String,
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
 #[wasm_bindgen(getter_with_clone)]
 pub struct UpgradeAvailability {
     pub player_availability: i32,
@@ -173,14 +173,14 @@ pub struct UpgradeAvailability {
     pub availability: i32,
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
 #[wasm_bindgen(getter_with_clone)]
 pub struct TechAvailability {
     pub player_availability: u32,
     pub tech_id: String,
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
 #[wasm_bindgen(getter_with_clone)]
 pub struct RandomUnitTable {
     pub id: i32,
@@ -202,7 +202,7 @@ pub struct RandomItemSet {
     pub items: Vec<RandomItemSetValue>,
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
 #[wasm_bindgen(getter_with_clone)]
 pub struct RandomItemTable {
     pub id: i32,
@@ -210,7 +210,7 @@ pub struct RandomItemTable {
     pub sets: Vec<RandomItemSet>,
 }
 
-#[derive(Debug, PartialEq, Default, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Default, Serialize, Deserialize, Clone)]
 #[wasm_bindgen]
 pub enum Tileset {
     #[default]
@@ -235,7 +235,7 @@ pub enum Tileset {
     Known,
 }
 
-#[derive(Debug, PartialEq, Default, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Default, Serialize, Deserialize, Clone)]
 #[wasm_bindgen]
 pub enum MapSize {
     #[default]
@@ -268,8 +268,9 @@ impl MapSize {
     }
 }
 
-#[derive(Derivative, Serialize, Deserialize)]
+#[derive(Derivative, Serialize, Deserialize, Clone)]
 #[derivative(Debug, Default, PartialEq)]
+#[wasm_bindgen(getter_with_clone)]
 pub struct W3iFile {
     pub version: GameVersion,
     #[derivative(PartialEq = "ignore")]
@@ -324,18 +325,14 @@ pub struct W3iFile {
     pub script_language2: Option<u32>,                    // v == 26 or v == 27
 }
 
-impl TryFrom<W3Raw> for W3iFile {
-    type Error = &'static str;
-
-    fn try_from(w3raw: W3Raw) -> Result<Self, Self::Error> {
+impl W3iFile {
+    pub fn try_from_w3raw(w3raw: W3Raw) -> Option<W3iFile> {
         match <W3iFile>::parse(&w3raw.data) {
-            Ok((_, w3i)) => Ok(w3i),
-            Err(_) => Err("Failed to parse W3I file"),
+            Ok((_, w3i)) => Some(w3i),
+            Err(_) => None,
         }
     }
-}
 
-impl W3iFile {
     pub fn update_with_wts(&self, wts: &WtsFile) -> Self {
         self.update_with_hashmap(&wts.trigger_strings)
     }

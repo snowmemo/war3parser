@@ -3,6 +3,9 @@ use std::fmt::{Display, Formatter};
 use mpq::Archive;
 use wasm_bindgen::prelude::wasm_bindgen;
 
+use crate::parser::{w3i::W3iFile, wts::WtsFile};
+
+/// Pre-defined filenames of MPQ files
 #[derive(Debug)]
 #[wasm_bindgen]
 pub enum War3Format {
@@ -53,6 +56,11 @@ impl War3Format {
     }
 }
 
+/// Raw data of a file extracted from the MPQ archive
+///
+/// - `filename`: The filename of the file
+/// - `data`: The raw data of the file
+/// - `size`: The size of the file
 #[derive(Debug)]
 #[wasm_bindgen(getter_with_clone)]
 pub struct W3Raw {
@@ -76,17 +84,22 @@ impl W3Raw {
     }
 }
 
+/// Extractor of MPQ files
+#[wasm_bindgen]
 pub struct Extractor {
     archive: Archive,
 }
+
+#[wasm_bindgen]
 impl Extractor {
+    /// Create a new extractor from a buffer
     pub fn new(buf: &[u8]) -> Self {
         let buf_vec = buf.to_vec();
         let archive = Archive::load(buf_vec).unwrap();
         Extractor { archive }
     }
 
-    /// extract formats by filename
+    /// Extract a file from the MPQ archive by filename
     pub fn extract_with_filename(&mut self, filename: &str) -> Option<W3Raw> {
         match self.archive.open_file(filename) {
             Ok(file) => {
@@ -102,7 +115,7 @@ impl Extractor {
         }
     }
 
-    /// extract formats by formats with fallbacks
+    /// Extract a file from the MPQ archive by format
     pub fn extract(&mut self, format: War3Format) -> Option<W3Raw> {
         for file in format.optional_files() {
             if let Some(content) = self.extract_with_filename(file) {
@@ -112,6 +125,7 @@ impl Extractor {
         None
     }
 
+    /// List all files in the MPQ archive
     pub fn list(&mut self) -> Option<Vec<String>> {
         match self.extract(War3Format::Listfile) {
             Some(content) => {
@@ -121,5 +135,14 @@ impl Extractor {
             }
             None => None,
         }
+    }
+
+    pub fn map_info(&mut self) -> Option<W3iFile> {
+        let w3i = self.extract(War3Format::W3i).unwrap();
+        let w3i_file = W3iFile::try_from_w3raw(w3i).unwrap();
+        let wts = self.extract(War3Format::Wts).unwrap();
+        let wts_file: WtsFile = wts.try_into().unwrap();
+        let w3i_file = w3i_file.update_with_wts(&wts_file);
+        Some(w3i_file)
     }
 }

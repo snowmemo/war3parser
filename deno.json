@@ -1,5 +1,17 @@
 {
+  "name": "@wesleyel/war3parser",
+  "version": "0.0.1",
+  "exports": "./dist/war3parser.generated.js",
   "tasks": {
     "wasmbuild": "deno run -A jsr:@deno/wasmbuild@0.17.3 --project war3parser --out dist"
-  }
+  },
+  "test": {
+    "include": ["tests/**/*.ts"]
+  },
+  "publish": {
+    "include": ["dist"],
+    "exclude": []
+  },
+  "exclude": ["node_modules"],
+  "license": "MIT"
 }

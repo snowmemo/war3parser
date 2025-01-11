@@ -114,7 +114,7 @@ mod tests {
             .expect("failed to extract w3i");
 
         assert_eq!(w3i.filename, "war3map.w3i");
-        let w3i: W3iFile = w3i.try_into().unwrap();
+        let w3i: W3iFile = W3iFile::try_from_w3raw(w3i).unwrap();
         assert_eq!(w3i.map_width, 160);
         assert_eq!(w3i.map_height, 128);
     }
@@ -126,7 +126,7 @@ mod tests {
             .extract(War3Format::W3i)
             .expect("failed to extract w3i");
 
-        let w3i: W3iFile = w3i.try_into().unwrap();
+        let w3i: W3iFile = W3iFile::try_from_w3raw(w3i).unwrap();
         let serialized = serde_json::to_string(&w3i).unwrap();
         let deserialized: W3iFile = serde_json::from_str(&serialized).unwrap();
         assert_eq!(w3i, deserialized);
