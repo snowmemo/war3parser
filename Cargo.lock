@@ -709,7 +709,7 @@ checksum = "06abde3611657adf66d383f00b093d7faecc7fa57071cce2578660c9f1010821"
 
 [[package]]
 name = "war3parser"
-version = "0.2.2"
+version = "0.0.1"
 dependencies = [
  "derivative",
  "image",
@@ -724,7 +724,7 @@ dependencies = [
 
 [[package]]
 name = "war3parser-cli"
-version = "0.2.2"
+version = "0.0.1"
 dependencies = [
  "clap",
  "war3parser",

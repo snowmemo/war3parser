@@ -104,6 +104,7 @@ pub struct Extractor {
 
 #[wasm_bindgen]
 impl Extractor {
+    #[wasm_bindgen(constructor)]
     /// Create a new extractor from a buffer
     pub fn new(buf: &[u8]) -> Self {
         let buf_vec = buf.to_vec();
