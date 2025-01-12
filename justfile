@@ -1,6 +1,6 @@
 wasm:
     rm -rf dist
-    cd war3parser && wasm-pack build --target web --out-dir ../dist
+    wasm-pack build packages/lib --target web --out-dir ../../dist --scope wesleyel
 
 wasm-publish:
-    cd dist && npm publish
+    cd dist && npm publish --access=public

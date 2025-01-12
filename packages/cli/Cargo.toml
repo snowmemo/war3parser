@@ -6,5 +6,5 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-war3parser = { path = "../war3parser" }
+war3parser = { path = "../lib" }
 clap = { version = "4.5.9", features = ["derive"] }
