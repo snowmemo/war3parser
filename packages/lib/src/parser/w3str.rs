@@ -94,7 +94,7 @@ pub fn parse_cstring(input: &[u8]) -> IResult<&[u8], String> {
     let terminator = "\0";
     let (input, bytes) = take_until(terminator)(input)?;
     let (input, _) = take(1usize)(input)?;
-    let string = String::from_utf8(bytes.to_vec()).unwrap().to_string();
+    let string = String::from_utf8_lossy(bytes).to_string();
     Ok((input, string))
 }
 
