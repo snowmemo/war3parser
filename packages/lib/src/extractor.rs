@@ -150,6 +150,16 @@ impl Extractor {
         }
     }
 
+    /// Validate the MPQ archive
+    pub fn validate(&mut self) -> bool {
+        self.list().is_some() && self.map_info().w3i.is_some()
+    }
+
+    /// Map info
+    ///
+    /// - `w3i`: The W3i file
+    /// - `minimap`: The minimap image
+    /// - `preview`: The preview image
     pub fn map_info(&mut self) -> MapInfo {
         let w3i_file = self
             .extract(War3Format::W3i)
