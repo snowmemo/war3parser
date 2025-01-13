@@ -11,6 +11,9 @@ use super::globals::TRAGGER_STR_RE;
 use super::w3parser::get_bit_from_u32;
 use super::wts::WtsFile;
 
+// https://github.com/stijnherfst/HiveWE/blob/c3ba5542d0e28e8c537c0aaf25269d9f6bd75d5d/src/base/map_info.ixx#L176
+// TODO: Implement the rest of the W3I file 
+
 #[derive(Debug, PartialOrd, PartialEq, Clone, Copy, Serialize, Deserialize)]
 #[wasm_bindgen]
 pub enum GameVersionType {
