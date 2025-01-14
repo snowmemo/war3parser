@@ -1,5 +1,4 @@
 use image::{codecs::tga::TgaDecoder, DynamicImage, RgbaImage};
-use nom::FindSubstring;
 
 use super::error::ParserError;
 pub struct TgaImage {
@@ -23,6 +22,10 @@ impl TgaImage {
 
     pub fn is_tga<T: AsRef<[u8]> + Sized>(buffer: &T) -> bool {
         let bytes = buffer.as_ref();
-        bytes.find_substring("TRUEVISION-XFILE.\0").is_some()
+        let pattern = b"TRUEVISION-XFILE.\0";
+        bytes
+            .windows(pattern.len())
+            .position(|window| window == pattern)
+            .is_some()
     }
 }
