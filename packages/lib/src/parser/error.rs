@@ -8,8 +8,6 @@ pub enum ParserError {
     FailedToFindMinimap,
     #[error("Map file {0} not found")]
     MapFileNotFound(String),
-    #[error("Failed to parse")]
-    FailedToParse(#[from] serde_wasm_bindgen::Error),
     #[error("Failed to load image")]
     FailedToLoadImage(#[from] image::ImageError),
     #[error("Failed to load BLP image")]
