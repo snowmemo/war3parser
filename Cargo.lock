@@ -700,6 +700,9 @@ dependencies = [
 [[package]]
 name = "war3parser-wasm"
 version = "0.0.3"
+dependencies = [
+ "war3parser",
+]
 
 [[package]]
 name = "weezl"
