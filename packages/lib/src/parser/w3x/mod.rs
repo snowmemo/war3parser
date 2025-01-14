@@ -25,7 +25,7 @@ pub struct War3MapW3x {
     pub max_players: Option<u32>,
 
     pub archive: Archive,
-    pub files: Vec<String>,
+    pub files: Option<Vec<String>>,
 }
 
 impl BinaryReadable for War3MapW3x {
@@ -43,7 +43,7 @@ impl BinaryReadable for War3MapW3x {
         };
 
         let mut archive = Archive::load(stream.data.clone())?;
-        let files = Self::get_file_names(&mut archive)?;
+        let files = Self::get_file_names(&mut archive).ok();
         Ok(Self {
             u1,
             name,
@@ -134,26 +134,30 @@ impl War3MapW3x {
     }
 
     pub fn read_minimap(&mut self) -> Result<Image, ParserError> {
-        let pattern = "war3mapmap";
-        let files = self.files.clone();
-        let filename = files
-            .iter()
-            .find(|&name| name.to_lowercase().contains(pattern))
-            .ok_or(ParserError::MapFileNotFound(pattern.to_string()))?;
-        let buffer = self.get(filename)?;
+        let buffer = [
+            "war3mapMap.tga",
+            "war3mapMap.blp",
+            "war3mappreview.tga",
+            "war3mappreview.blp",
+        ]
+        .iter()
+        .find_map(|&filename| self.get(filename).ok())
+        .ok_or(ParserError::MapFileNotFound("war3mapMap".to_string()))?;
         let mut data = vec![0; buffer.size() as usize];
         buffer.read(&mut self.archive, &mut data)?;
         Self::buffer_to_image(&data)
     }
 
     pub fn read_preview(&mut self) -> Result<Image, ParserError> {
-        let pattern = "war3mappreview";
-        let files = self.files.clone();
-        let filename = files
-            .iter()
-            .find(|&name| name.to_lowercase().contains(pattern))
-            .ok_or(ParserError::MapFileNotFound(pattern.to_string()))?;
-        let buffer = self.get(filename)?;
+        let buffer = [
+            "war3mapPreview.tga",
+            "war3mapPreview.blp",
+            "war3mappreview.tga",
+            "war3mappreview.blp",
+        ]
+        .iter()
+        .find_map(|&filename| self.get(filename).ok())
+        .ok_or(ParserError::MapFileNotFound("war3mapPreview".to_string()))?;
         let mut data = vec![0; buffer.size() as usize];
         buffer.read(&mut self.archive, &mut data)?;
         Self::buffer_to_image(&data)
