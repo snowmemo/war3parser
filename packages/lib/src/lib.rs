@@ -1,3 +1,2 @@
-pub mod extractor;
 pub mod parser;
-pub mod preview;
+pub mod war3map_metadata;

@@ -1,35 +1,36 @@
-use war3parser::extractor::Extractor;
+use js_sys::Uint8Array;
+use war3parser::war3map_metadata::War3MapMetadata;
 
-mod tests {
-    use war3parser::{extractor::War3Format, parser::w3i::W3iFile};
+fn load_map() -> Option<War3MapMetadata> {
+    let buf = include_bytes!("../assets/TowerSurvivorsv1.71.w3x");
+    let u8array = Uint8Array::new_with_length(buf.len() as u32);
+    u8array.copy_from(buf);
+    War3MapMetadata::from(u8array)
+}
 
-    use super::*;
+#[test]
+fn test_w3x_parse() {
+    let map = load_map().expect("failed to load map");
+    let map_info = map.map_info.expect("failed to get map info");
+    let _imp = map.imp.expect("failed to get imports");
+    let _wts = map.wts.expect("failed to get string table");
+    let _minimap = map.minimap.expect("failed to get minimap");
+    let _preview = map.preview.expect("failed to get preview");
 
-    fn load_map() -> Extractor {
-        let buf = include_bytes!("../assets/TowerSurvivorsv1.71.w3x");
-        Extractor::new(buf)
-    }
+    println!("map name: {:?}", map_info.name);
+    println!("map author: {:?}", map_info.author);
+    println!("map description: {:?}", map_info.description);
 
-    #[test]
-    fn test_list_file_exists() {
-        let mut extractor = load_map();
-        let listfiles = extractor.list().expect("failed to list files");
-        // for file in listfiles {
-        //     println!("{}", file);
-        //     if let Some(raw) = extractor.extract_with_filename(&file) {
-        //         std::fs::write(format!("assets/test/{}", file), raw.data).unwrap();
-        //     }
-        // }
-        assert_eq!(listfiles.contains(&"war3map.w3i".to_string()), true);
-    }
-
-    #[test]
-    fn test_extract_file() {
-        let mut extractor = load_map();
-        let raw = extractor
-            .extract(War3Format::W3i)
-            .expect("failed to extract w3i");
-        let w3i = W3iFile::try_from_w3raw(raw).expect("failed to parse w3i");
-        println!("{:?}", w3i.map_version);
-    }
+    println!(
+        "map loading_screen_title: {:?}",
+        map_info.loading_screen_title
+    );
+    println!(
+        "map loading_screen_subtitle: {:?}",
+        map_info.loading_screen_subtitle
+    );
+    println!(
+        "map loading_screen_text: {:?}",
+        map_info.loading_screen_text
+    );
 }

@@ -1,8 +1,6 @@
 use regex::Regex;
 use wasm_bindgen::JsValue;
 
-use crate::extractor::W3Raw;
-
 use super::error::ParserError;
 
 /// TRIGSTR_007 / TRIGSTR_007ab / TRIGSTR_7 TRIGSTR_-007
@@ -17,11 +15,19 @@ pub struct War3MapWts {
 
 impl War3MapWts {
     pub fn load(buffer: &String) -> Result<Self, ParserError> {
-        let re = Regex::new(STRINGS_RE).unwrap();
+        let re = Regex::new(STRINGS_RE)?;
         let string_map = js_sys::Map::new();
         for caps in re.captures_iter(buffer.as_str()) {
-            let id = caps.get(1).unwrap().as_str().to_string();
-            let content = String::from(caps.get(2).unwrap().as_str());
+            let id = caps
+                .get(1)
+                .ok_or(ParserError::FailedToFindStrings)?
+                .as_str()
+                .to_string();
+            let content = String::from(
+                caps.get(2)
+                    .ok_or(ParserError::FailedToFindStrings)?
+                    .as_str(),
+            );
             if let Ok(id) = id.parse::<i32>() {
                 string_map.set(&JsValue::from(id), &JsValue::from(content));
             }

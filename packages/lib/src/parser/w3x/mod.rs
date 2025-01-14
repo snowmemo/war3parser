@@ -1,12 +1,22 @@
 use binary_reader::BinaryReader;
 use mpq::{Archive, File};
+use web_sys::ImageData;
 
 use super::{
     binary_reader::{AutoReadable, BinaryReadable},
+    blp::BlpImage,
     error::ParserError,
+    imp::War3MapImp,
+    tga::TgaImage,
     w3i::War3MapW3i,
     wts::War3MapWts,
 };
+
+pub struct Image {
+    pub width: u32,
+    pub height: u32,
+    pub data: ImageData,
+}
 
 pub struct War3MapW3x {
     pub u1: Option<u32>,
@@ -43,7 +53,7 @@ impl BinaryReadable for War3MapW3x {
 }
 
 impl War3MapW3x {
-    fn get_file_names(&mut self) -> Result<Vec<String>, ParserError> {
+    pub fn get_file_names(&mut self) -> Result<Vec<String>, ParserError> {
         let file = self.archive.open_file("(listfile)")?;
         let mut data = vec![0; file.size() as usize];
         file.read(&mut self.archive, &mut data).unwrap();
@@ -51,21 +61,26 @@ impl War3MapW3x {
         Ok(listfile.split("\r\n").map(|s| s.to_string()).collect())
     }
 
-    fn get(&mut self, filename: &str) -> Result<File, ParserError> {
+    pub fn get(&mut self, filename: &str) -> Result<File, ParserError> {
         self.archive.open_file(filename).map_err(ParserError::from)
     }
 
-    fn has(&mut self, filename: &str) -> bool {
+    pub fn has(&mut self, filename: &str) -> bool {
         self.archive.open_file(filename).is_ok()
     }
 
-    fn get_script_file(&mut self) -> Option<File> {
-        ["war3map.j", "scripts\\war3map.j", "war3map.lua"]
-            .iter()
-            .find_map(|&filename| self.get(filename).ok())
+    pub fn get_script_file(&mut self) -> Option<File> {
+        [
+            "war3map.j",
+            "scripts\\war3map.j",
+            "war3map.lua",
+            "scripts\\war3map.lua",
+        ]
+        .iter()
+        .find_map(|&filename| self.get(filename).ok())
     }
 
-    fn get_map_info(&mut self) -> Result<War3MapW3i, ParserError> {
+    pub fn get_map_info(&mut self) -> Result<War3MapW3i, ParserError> {
         let file = self.get("war3map.w3i")?;
         let mut data = vec![0; file.size() as usize];
         file.read(&mut self.archive, &mut data)?;
@@ -75,8 +90,12 @@ impl War3MapW3x {
         Ok(map_info)
     }
 
-    pub fn read_imports(&mut self) -> Result<Vec<String>, ParserError> {
-        unimplemented!()
+    pub fn read_imports(&mut self) -> Result<War3MapImp, ParserError> {
+        let file = self.get("war3map.imp")?;
+        let mut data = vec![0; file.size() as usize];
+        file.read(&mut self.archive, &mut data)?;
+        let mut reader = BinaryReader::from_vec(&data);
+        War3MapImp::load(&mut reader, 0)
     }
 
     pub fn read_string_table(&mut self) -> Result<War3MapWts, ParserError> {
@@ -85,5 +104,45 @@ impl War3MapW3x {
         file.read(&mut self.archive, &mut data)?;
         let buffer = String::from_utf8(data)?;
         War3MapWts::load(&buffer)
+    }
+
+    fn buffer_to_image(data: &[u8]) -> Result<Image, ParserError> {
+        if BlpImage::is_blp(&data) {
+            let blp = BlpImage::load(&data)?;
+            Ok(Image {
+                width: blp.width,
+                height: blp.height,
+                data: blp.data,
+            })
+        } else if TgaImage::is_tga(&data) {
+            let tga = TgaImage::load(&data)?;
+            Ok(Image {
+                width: tga.width,
+                height: tga.height,
+                data: tga.data,
+            })
+        } else {
+            Err(ParserError::FailedToFindMinimap)
+        }
+    }
+
+    pub fn read_minimap(&mut self) -> Result<Image, ParserError> {
+        let buffer = ["war3mapMap.tga", "war3mapMap.blp"]
+            .iter()
+            .find_map(|&filename| self.get(filename).ok())
+            .ok_or(ParserError::FailedToFindMinimap)?;
+        let mut data = vec![0; buffer.size() as usize];
+        buffer.read(&mut self.archive, &mut data)?;
+        Self::buffer_to_image(&data)
+    }
+
+    pub fn read_preview(&mut self) -> Result<Image, ParserError> {
+        let buffer = ["war3mapPreview.tga", "war3mapPreview.blp"]
+            .iter()
+            .find_map(|&filename| self.get(filename).ok())
+            .ok_or(ParserError::FailedToFindMinimap)?;
+        let mut data = vec![0; buffer.size() as usize];
+        buffer.read(&mut self.archive, &mut data)?;
+        Self::buffer_to_image(&data)
     }
 }

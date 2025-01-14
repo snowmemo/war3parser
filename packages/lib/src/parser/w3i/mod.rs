@@ -7,10 +7,7 @@ pub mod upgrade_availability_change;
 
 use binary_reader::BinaryReader;
 
-use crate::{
-    extractor::W3Raw,
-    parser::binary_reader::{AutoReadable, BinaryReadable},
-};
+use crate::parser::binary_reader::{AutoReadable, BinaryReadable};
 
 use super::error::ParserError;
 
