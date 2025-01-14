@@ -1,5 +1,6 @@
+use std::collections::HashMap;
+
 use binary_reader::BinaryReader;
-use wasm_bindgen::JsValue;
 
 use super::{
     binary_reader::{AutoReadable, BinaryReadable},
@@ -15,7 +16,7 @@ pub struct Import {
 #[derive(Default)]
 pub struct War3MapImp {
     pub version: u32,
-    pub entries: js_sys::Map,
+    pub entries: HashMap<String, Import>,
 }
 
 impl BinaryReadable for Import {
@@ -31,19 +32,13 @@ impl BinaryReadable for War3MapImp {
     fn load(stream: &mut BinaryReader, _version: u32) -> Result<Self, ParserError> {
         let version: u32 = AutoReadable::read(stream)?;
         let count: u32 = AutoReadable::read(stream)?;
-        let entries = js_sys::Map::new();
+        let mut entries = HashMap::new();
         for _ in 0..count {
             let import = Import::load(stream, version)?;
             if import.is_custom > 1 {
-                entries.set(
-                    &JsValue::from(&import.path),
-                    &serde_wasm_bindgen::to_value(&import)?,
-                );
+                entries.insert(import.path.clone(), import);
             } else {
-                entries.set(
-                    &JsValue::from(format!("war3mapimported\\{}", import.path)),
-                    &serde_wasm_bindgen::to_value(&import)?,
-                );
+                entries.insert(format!("war3mapimported\\{}", import.path.clone()), import);
             }
         }
         Ok(War3MapImp { version, entries })

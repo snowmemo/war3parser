@@ -1,5 +1,6 @@
+use std::collections::HashMap;
+
 use regex::Regex;
-use wasm_bindgen::JsValue;
 
 use super::error::ParserError;
 
@@ -10,13 +11,13 @@ pub const TRAGGER_STR_RE: &str = r"TRIGSTR_(-?\d+)(?:\w+)?";
 pub const STRINGS_RE: &str = r"STRING\s+([0-9]+)\s+\{\r\n+([^\}]*)\r\n\}";
 
 pub struct War3MapWts {
-    pub string_map: js_sys::Map,
+    pub string_map: HashMap<i32, String>,
 }
 
 impl War3MapWts {
     pub fn load(buffer: &String) -> Result<Self, ParserError> {
         let re = Regex::new(STRINGS_RE)?;
-        let string_map = js_sys::Map::new();
+        let mut string_map = HashMap::new();
         for caps in re.captures_iter(buffer.as_str()) {
             let id = caps
                 .get(1)
@@ -29,7 +30,7 @@ impl War3MapWts {
                     .as_str(),
             );
             if let Ok(id) = id.parse::<i32>() {
-                string_map.set(&JsValue::from(id), &JsValue::from(content));
+                string_map.insert(id, content);
             }
         }
         Ok(Self { string_map })

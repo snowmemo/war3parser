@@ -1,7 +1,7 @@
 use std::path::Path;
 
 use clap::{Parser, Subcommand};
-use war3parser::war3map_metadata::Extractor;
+use war3parser::war3map_metadata::War3MapMetadata;
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
@@ -46,14 +46,7 @@ fn main() {
             file_name,
             out_dir,
         } => {
-            let buf = std::fs::read(map_path).expect("Failed to read map");
-            let mut map = Extractor::new(&buf);
-            let w3raw = map
-                .extract_with_filename(&file_name)
-                .expect("Failed to extract file");
-            let out_path = Path::new(&out_dir).join(&w3raw.filename);
-            std::fs::write(&out_path, w3raw.data).expect("Failed to write file");
-            println!("Extracted {} to {}", w3raw.filename, out_path.display());
+            unimplemented!()
         }
 
         _ => {

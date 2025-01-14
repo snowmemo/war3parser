@@ -1,5 +1,4 @@
 use binary_reader::BinaryReader;
-use js_sys::Uint8Array;
 
 use crate::parser::{
     binary_reader::BinaryReadable,
@@ -18,10 +17,8 @@ pub struct War3MapMetadata {
 }
 
 impl War3MapMetadata {
-    pub fn from(buffer: Uint8Array) -> Option<Self> {
-        let mut data = vec![0; buffer.length() as usize];
-        buffer.copy_to(&mut data);
-        let mut binary_reader = BinaryReader::from_u8(&data);
+    pub fn from(buffer: &[u8]) -> Option<Self> {
+        let mut binary_reader = BinaryReader::from_u8(buffer);
 
         if let Ok(w3x) = War3MapW3x::load(&mut binary_reader, 0) {
             let mut w3x_box = Box::new(w3x);

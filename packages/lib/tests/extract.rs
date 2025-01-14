@@ -1,11 +1,8 @@
-use js_sys::Uint8Array;
 use war3parser::war3map_metadata::War3MapMetadata;
 
 fn load_map() -> Option<War3MapMetadata> {
     let buf = include_bytes!("../assets/TowerSurvivorsv1.71.w3x");
-    let u8array = Uint8Array::new_with_length(buf.len() as u32);
-    u8array.copy_from(buf);
-    War3MapMetadata::from(u8array)
+    War3MapMetadata::from(buf)
 }
 
 #[test]
