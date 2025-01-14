@@ -3,6 +3,7 @@ use binary_reader::BinaryReader;
 use crate::parser::binary_reader::{AutoReadable, BinaryReadable};
 use crate::parser::error::ParserError;
 
+#[derive(Debug)]
 pub struct Player {
     pub id: i32,
     pub player_type: i32,

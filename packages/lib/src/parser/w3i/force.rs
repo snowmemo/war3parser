@@ -3,6 +3,7 @@ use binary_reader::BinaryReader;
 use crate::parser::binary_reader::{AutoReadable, BinaryReadable};
 use crate::parser::error::ParserError;
 
+#[derive(Debug)]
 pub struct Force {
     pub flags: u32,
     pub player_masks: u32,

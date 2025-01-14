@@ -1,14 +1,11 @@
-use image::{codecs::tga::TgaDecoder, DynamicImage};
+use image::{codecs::tga::TgaDecoder, DynamicImage, RgbaImage};
 use nom::FindSubstring;
-use photon_rs::{to_image_data, PhotonImage};
 
 use super::error::ParserError;
-use web_sys::ImageData;
-
 pub struct TgaImage {
     pub width: u32,
     pub height: u32,
-    pub data: ImageData,
+    pub data: RgbaImage,
 }
 
 impl TgaImage {
@@ -17,12 +14,10 @@ impl TgaImage {
         let decoder = TgaDecoder::new(cursor)?;
         let image = DynamicImage::from_decoder(decoder)?;
 
-        let proton = PhotonImage::new(image.to_rgba8().to_vec(), image.width(), image.height());
-        let data = to_image_data(proton);
         Ok(Self {
             width: image.width(),
             height: image.height(),
-            data,
+            data: image.to_rgba8(),
         })
     }
 

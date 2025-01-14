@@ -5,11 +5,13 @@ use crate::parser::{
     error::ParserError,
 };
 
+#[derive(Debug)]
 pub struct RandomUnit {
     pub chance: i32,
     pub ids: Vec<[u8; 4]>,
 }
 
+#[derive(Debug)]
 pub struct RandomUnitTable {
     pub id: i32,
     pub name: String,

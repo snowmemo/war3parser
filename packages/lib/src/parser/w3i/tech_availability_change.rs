@@ -5,6 +5,7 @@ use crate::parser::{
     error::ParserError,
 };
 
+#[derive(Debug)]
 pub struct TechAvailabilityChange {
     pub player_flags: u32,
     pub id: [u8; 4],

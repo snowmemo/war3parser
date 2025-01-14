@@ -5,15 +5,18 @@ use crate::parser::{
     error::ParserError,
 };
 
+#[derive(Debug)]
 pub struct RandomItem {
     pub chance: i32,
     pub id: [u8; 4],
 }
 
+#[derive(Debug)]
 pub struct RandomItemSet {
     pub items: Vec<RandomItem>,
 }
 
+#[derive(Debug)]
 pub struct RandomItemTable {
     pub id: i32,
     pub name: String,

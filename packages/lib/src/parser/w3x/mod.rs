@@ -1,6 +1,6 @@
-use binary_reader::BinaryReader;
+use binary_reader::{BinaryReader, Endian};
+use image::RgbaImage;
 use mpq::{Archive, File};
-use web_sys::ImageData;
 
 use super::{
     binary_reader::{AutoReadable, BinaryReadable},
@@ -15,7 +15,7 @@ use super::{
 pub struct Image {
     pub width: u32,
     pub height: u32,
-    pub data: ImageData,
+    pub data: RgbaImage,
 }
 
 pub struct War3MapW3x {
@@ -25,6 +25,7 @@ pub struct War3MapW3x {
     pub max_players: Option<u32>,
 
     pub archive: Archive,
+    pub files: Vec<String>,
 }
 
 impl BinaryReadable for War3MapW3x {
@@ -41,22 +42,24 @@ impl BinaryReadable for War3MapW3x {
             (Some(u1), Some(name), Some(flags), Some(max_players))
         };
 
-        let archive = Archive::load(stream.data.clone())?;
+        let mut archive = Archive::load(stream.data.clone())?;
+        let files = Self::get_file_names(&mut archive)?;
         Ok(Self {
             u1,
             name,
             flags,
             max_players,
             archive,
+            files,
         })
     }
 }
 
 impl War3MapW3x {
-    pub fn get_file_names(&mut self) -> Result<Vec<String>, ParserError> {
-        let file = self.archive.open_file("(listfile)")?;
+    pub fn get_file_names(archive: &mut Archive) -> Result<Vec<String>, ParserError> {
+        let file = archive.open_file("(listfile)")?;
         let mut data = vec![0; file.size() as usize];
-        file.read(&mut self.archive, &mut data).unwrap();
+        file.read(archive, &mut data).unwrap();
         let listfile = String::from_utf8(data)?;
         Ok(listfile.split("\r\n").map(|s| s.to_string()).collect())
     }
@@ -80,12 +83,14 @@ impl War3MapW3x {
         .find_map(|&filename| self.get(filename).ok())
     }
 
-    pub fn get_map_info(&mut self) -> Result<War3MapW3i, ParserError> {
+    pub fn read_map_info(&mut self) -> Result<War3MapW3i, ParserError> {
         let file = self.get("war3map.w3i")?;
         let mut data = vec![0; file.size() as usize];
         file.read(&mut self.archive, &mut data)?;
 
         let mut reader = BinaryReader::from_vec(&data);
+        reader.set_endian(Endian::Little);
+
         let map_info = War3MapW3i::load(&mut reader, 0)?;
         Ok(map_info)
     }
@@ -95,6 +100,8 @@ impl War3MapW3x {
         let mut data = vec![0; file.size() as usize];
         file.read(&mut self.archive, &mut data)?;
         let mut reader = BinaryReader::from_vec(&data);
+        reader.set_endian(Endian::Little);
+
         War3MapImp::load(&mut reader, 0)
     }
 
@@ -127,20 +134,26 @@ impl War3MapW3x {
     }
 
     pub fn read_minimap(&mut self) -> Result<Image, ParserError> {
-        let buffer = ["war3mapMap.tga", "war3mapMap.blp"]
+        let pattern = "war3mapmap";
+        let files = self.files.clone();
+        let filename = files
             .iter()
-            .find_map(|&filename| self.get(filename).ok())
-            .ok_or(ParserError::FailedToFindMinimap)?;
+            .find(|&name| name.to_lowercase().contains(pattern))
+            .ok_or(ParserError::MapFileNotFound(pattern.to_string()))?;
+        let buffer = self.get(filename)?;
         let mut data = vec![0; buffer.size() as usize];
         buffer.read(&mut self.archive, &mut data)?;
         Self::buffer_to_image(&data)
     }
 
     pub fn read_preview(&mut self) -> Result<Image, ParserError> {
-        let buffer = ["war3mapPreview.tga", "war3mapPreview.blp"]
+        let pattern = "war3mappreview";
+        let files = self.files.clone();
+        let filename = files
             .iter()
-            .find_map(|&filename| self.get(filename).ok())
-            .ok_or(ParserError::FailedToFindMinimap)?;
+            .find(|&name| name.to_lowercase().contains(pattern))
+            .ok_or(ParserError::MapFileNotFound(pattern.to_string()))?;
+        let buffer = self.get(filename)?;
         let mut data = vec![0; buffer.size() as usize];
         buffer.read(&mut self.archive, &mut data)?;
         Self::buffer_to_image(&data)

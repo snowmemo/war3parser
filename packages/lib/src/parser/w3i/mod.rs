@@ -17,6 +17,7 @@ use {
     upgrade_availability_change::UpgradeAvailabilityChange,
 };
 
+#[derive(Debug)]
 pub struct War3MapW3i {
     pub version: u32,
     pub saves: u32,
