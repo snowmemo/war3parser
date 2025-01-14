@@ -1,7 +1,9 @@
 use binary_reader::BinaryReader;
 
-use crate::parser::binary_reader::{AutoReadable, BinaryReadable};
-use anyhow::Result;
+use crate::parser::{
+    binary_reader::{AutoReadable, BinaryReadable},
+    error::ParserError,
+};
 
 pub struct UpgradeAvailabilityChange {
     pub player_flags: u32,
@@ -11,7 +13,7 @@ pub struct UpgradeAvailabilityChange {
 }
 
 impl BinaryReadable for UpgradeAvailabilityChange {
-    fn load(stream: &mut BinaryReader, _version: u32) -> Result<Self> {
+    fn load(stream: &mut BinaryReader, _version: u32) -> Result<Self, ParserError> {
         Ok(Self {
             player_flags: AutoReadable::read(stream)?,
             id: AutoReadable::read(stream)?,

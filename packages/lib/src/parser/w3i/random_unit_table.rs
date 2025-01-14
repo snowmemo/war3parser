@@ -1,7 +1,9 @@
 use binary_reader::BinaryReader;
 
-use crate::parser::binary_reader::{AutoReadable, BinaryReadable};
-use anyhow::Result;
+use crate::parser::{
+    binary_reader::{AutoReadable, BinaryReadable},
+    error::ParserError,
+};
 
 pub struct RandomUnit {
     pub chance: i32,
@@ -17,7 +19,7 @@ pub struct RandomUnitTable {
 }
 
 impl BinaryReadable for RandomUnit {
-    fn load(stream: &mut BinaryReader, position: u32) -> Result<Self> {
+    fn load(stream: &mut BinaryReader, position: u32) -> Result<Self, ParserError> {
         Ok(Self {
             chance: AutoReadable::read(stream)?,
             ids: {
@@ -32,7 +34,7 @@ impl BinaryReadable for RandomUnit {
 }
 
 impl BinaryReadable for RandomUnitTable {
-    fn load(stream: &mut BinaryReader, _version: u32) -> Result<Self> {
+    fn load(stream: &mut BinaryReader, _version: u32) -> Result<Self, ParserError> {
         let id: i32 = AutoReadable::read(stream)?;
         let name: String = AutoReadable::read(stream)?;
         let position: i32 = AutoReadable::read(stream)?;

@@ -11,7 +11,8 @@ use crate::{
     extractor::W3Raw,
     parser::binary_reader::{AutoReadable, BinaryReadable},
 };
-use anyhow::Result;
+
+use super::error::ParserError;
 
 use {
     force::Force, player::Player, random_item_table::RandomItemTable,
@@ -75,7 +76,7 @@ pub struct War3MapW3i {
 }
 
 impl BinaryReadable for War3MapW3i {
-    fn load(stream: &mut BinaryReader, _version: u32) -> Result<Self> {
+    fn load(stream: &mut BinaryReader, _version: u32) -> Result<Self, ParserError> {
         let version: u32 = AutoReadable::read(stream)?;
         Ok(Self {
             version,
@@ -199,8 +200,7 @@ impl BinaryReadable for War3MapW3i {
                 let mut tech_availability_changes: Vec<TechAvailabilityChange> =
                     Vec::with_capacity(count as usize);
                 for _ in 0..count {
-                    tech_availability_changes
-                        .push(TechAvailabilityChange::load(stream, version)?);
+                    tech_availability_changes.push(TechAvailabilityChange::load(stream, version)?);
                 }
                 tech_availability_changes
             },
@@ -227,11 +227,6 @@ impl BinaryReadable for War3MapW3i {
 }
 
 impl War3MapW3i {
-    pub fn try_from(w3raw: W3Raw) -> Result<Self> {
-        let mut stream = BinaryReader::from_vec(&w3raw.data);
-        Self::load(&mut stream, 0)
-    }
-
     pub fn get_build_version(&self) -> u32 {
         match self.build_version {
             Some(version) => version[0] * 100 + version[1],

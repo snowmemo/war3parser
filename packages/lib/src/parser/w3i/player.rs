@@ -1,7 +1,7 @@
 use binary_reader::BinaryReader;
 
 use crate::parser::binary_reader::{AutoReadable, BinaryReadable};
-use anyhow::Result;
+use crate::parser::error::ParserError;
 
 pub struct Player {
     pub id: i32,
@@ -16,7 +16,7 @@ pub struct Player {
 }
 
 impl BinaryReadable for Player {
-    fn load(stream: &mut BinaryReader, version: u32) -> Result<Self> {
+    fn load(stream: &mut BinaryReader, version: u32) -> Result<Self, ParserError> {
         Ok(Self {
             id: AutoReadable::read(stream)?,
             player_type: AutoReadable::read(stream)?,

@@ -1,7 +1,7 @@
 use binary_reader::BinaryReader;
 
 use crate::parser::binary_reader::{AutoReadable, BinaryReadable};
-use anyhow::Result;
+use crate::parser::error::ParserError;
 
 pub struct Force {
     pub flags: u32,
@@ -10,7 +10,7 @@ pub struct Force {
 }
 
 impl BinaryReadable for Force {
-    fn load(stream: &mut BinaryReader, _version: u32) -> Result<Self> {
+    fn load(stream: &mut BinaryReader, _version: u32) -> Result<Self, ParserError> {
         Ok(Self {
             flags: AutoReadable::read(stream)?,
             player_masks: AutoReadable::read(stream)?,

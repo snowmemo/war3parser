@@ -1,8 +1,9 @@
-use anyhow::Result;
 use regex::Regex;
 use wasm_bindgen::JsValue;
 
 use crate::extractor::W3Raw;
+
+use super::error::ParserError;
 
 /// TRIGSTR_007 / TRIGSTR_007ab / TRIGSTR_7 TRIGSTR_-007
 pub const TRAGGER_STR_RE: &str = r"TRIGSTR_(-?\d+)(?:\w+)?";
@@ -15,8 +16,7 @@ pub struct War3MapWts {
 }
 
 impl War3MapWts {
-    pub fn load(buffer: &Vec<u8>) -> Result<Self> {
-        let buffer = String::from_utf8_lossy(buffer).to_string();
+    pub fn load(buffer: &String) -> Result<Self, ParserError> {
         let re = Regex::new(STRINGS_RE).unwrap();
         let string_map = js_sys::Map::new();
         for caps in re.captures_iter(buffer.as_str()) {
@@ -27,9 +27,5 @@ impl War3MapWts {
             }
         }
         Ok(Self { string_map })
-    }
-
-    pub fn try_from(w3raw: W3Raw) -> Result<Self> {
-        Self::load(&w3raw.data)
     }
 }

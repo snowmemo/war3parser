@@ -9,3 +9,5 @@ pub mod w3i;
 /// Code inspired by the following sources:
 /// 1. <https://github.com/Barogthor/WarEditor/blob/master/wce_map/src/trigger_string_file.rs>
 pub mod wts;
+
+pub mod w3x;
