@@ -5,7 +5,7 @@ use mpq::Archive;
 use wasm_bindgen::prelude::wasm_bindgen;
 
 use crate::{
-    parser::{w3i::W3iFile, wts::WtsFile},
+    parser::{w3i::War3MapW3i, wts::War3MapWts},
     preview::{ImageRaw, RgbaImageRaw},
 };
 
@@ -42,7 +42,9 @@ impl War3Format {
             War3Format::W3i => vec!["war3map.w3i"],
             War3Format::Wts => vec!["war3map.wts"],
             War3Format::Wtg => vec!["war3map.wtg"],
-            War3Format::MapJ => vec!["war3map.j", "Scripts/war3map.j", "scripts/war3map.j"],
+            War3Format::MapJ => {
+                vec!["war3map.j", "Scripts/war3map.j", "scripts/war3map.j"]
+            }
             War3Format::MapPreview => vec!["war3mapPreview.tga", "war3mapPreview.blp"],
             War3Format::MapMinimap => vec!["war3mapMap.tga", "war3mapMap.blp"],
             War3Format::Listfile => vec!["(listfile)"],
@@ -91,7 +93,7 @@ impl W3Raw {
 #[derive(Debug, Clone)]
 #[wasm_bindgen(getter_with_clone)]
 pub struct MapInfo {
-    pub w3i: Option<W3iFile>,
+    pub w3i: Option<War3MapW3i>,
     pub minimap: Option<RgbaImageRaw>,
     pub preview: Option<RgbaImageRaw>,
 }
@@ -143,7 +145,8 @@ impl Extractor {
         match self.extract(War3Format::Listfile) {
             Some(content) => {
                 let listfile = content.to_string();
-                let list: Vec<String> = listfile.split("\r\n").map(|s| s.to_string()).collect();
+                let list: Vec<String> =
+                    listfile.split("\r\n").map(|s| s.to_string()).collect();
                 Some(list)
             }
             None => None,

@@ -30,6 +30,6 @@ mod tests {
             .extract(War3Format::W3i)
             .expect("failed to extract w3i");
         let w3i = W3iFile::try_from_w3raw(raw).expect("failed to parse w3i");
-        println!("{:?}", w3i.version);
+        println!("{:?}", w3i.map_version);
     }
 }
