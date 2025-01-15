@@ -1,10 +1,10 @@
 # war3parser
 
-![Crates.io Version](https://img.shields.io/crates/v/war3parser)
-![docs.rs](https://img.shields.io/docsrs/war3parser)
-![NPM Version](https://img.shields.io/npm/v/%40wesleyel%2Fwar3parser)
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/wesleyel/war3parser/build.yml)
-![GitHub Release](https://img.shields.io/github/v/release/wesleyel/war3parser?label=war3parser-cli)
+[![Crates.io Version](https://img.shields.io/crates/v/war3parser)](https://crates.io/crates/war3parser)
+[![docs.rs](https://img.shields.io/docsrs/war3parser)](https://docs.rs/war3parser)
+[![NPM Version](https://img.shields.io/npm/v/%40wesleyel%2Fwar3parser)](https://www.npmjs.com/package/@wesleyel/war3parser)
+[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/wesleyel/war3parser/build.yml)](https://github.com/wesleyel/war3parser/actions/workflows/build.yml)
+[![GitHub Release](https://img.shields.io/github/v/release/wesleyel/war3parser)](https://github.com/wesleyel/war3parser/releases)
 
 `war3parser` is a library for parsing and extracting Warcraft III map files. It provides functionality to extract data from MPQ files and supports parsing various file formats.
 
