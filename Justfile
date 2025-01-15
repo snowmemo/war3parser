@@ -3,7 +3,7 @@ clean-wasm:
     mkdir -p dist
 
 build-wasm: clean-wasm
-    wasm-pack build {{justfile_directory()}}/packages/wasm --target web --out-dir ../../dist --scope wesleyel
+    wasm-pack build {{justfile_directory()}}/packages/wasm --out-name war3parser --target web --out-dir ../../dist --scope wesleyel
 
 build-lib:
     cd {{justfile_directory()}}/packages/lib && cargo build
