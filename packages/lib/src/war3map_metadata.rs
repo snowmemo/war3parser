@@ -1,7 +1,4 @@
-use binary_reader::{BinaryReader, Endian};
-
 use crate::parser::{
-    binary_reader::BinaryReadable,
     error::ParserError,
     imp::War3MapImp,
     w3i::War3MapW3i,
@@ -18,10 +15,7 @@ pub struct War3MapMetadata {
 
 impl War3MapMetadata {
     pub fn from(buffer: &[u8]) -> Option<Self> {
-        let mut binary_reader = BinaryReader::from_u8(buffer);
-        binary_reader.set_endian(Endian::Little);
-
-        if let Ok(w3x) = War3MapW3x::load(&mut binary_reader, 0) {
+        if let Ok(w3x) = War3MapW3x::from_buffer(buffer) {
             let mut w3x_box = Box::new(w3x);
             let mut images = Vec::new();
             if let Ok(minimap) = w3x_box.read_minimap() {

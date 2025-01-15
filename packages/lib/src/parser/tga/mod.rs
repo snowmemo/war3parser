@@ -23,8 +23,6 @@ impl TgaImage {
     pub fn is_tga<T: AsRef<[u8]> + Sized>(buffer: &T) -> bool {
         let bytes = buffer.as_ref();
         let pattern = b"TRUEVISION-XFILE.\0";
-        bytes
-            .windows(pattern.len())
-            .any(|window| window == pattern)
+        bytes.windows(pattern.len()).any(|window| window == pattern)
     }
 }

@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use binary_reader::{BinaryReader, Endian};
 use image::RgbaImage;
 use mpq::{Archive, File};
@@ -56,6 +58,17 @@ impl BinaryReadable for War3MapW3x {
 }
 
 impl War3MapW3x {
+    pub fn new(path: PathBuf) -> Result<Self, ParserError> {
+        let buffer = std::fs::read(path)?;
+        Self::from_buffer(&buffer)
+    }
+
+    pub fn from_buffer(buffer: &[u8]) -> Result<Self, ParserError> {
+        let mut binary_reader = BinaryReader::from_u8(buffer);
+        binary_reader.set_endian(Endian::Little);
+        War3MapW3x::load(&mut binary_reader, 0)
+    }
+
     pub fn get_file_names(archive: &mut Archive) -> Result<Vec<String>, ParserError> {
         let file = archive.open_file("(listfile)")?;
         let mut data = vec![0; file.size() as usize];
