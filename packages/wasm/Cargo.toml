@@ -5,6 +5,7 @@ edition = "2021"
 description = "A parser for Warcraft 3 map files"
 license = "MIT"
 repository = "https://github.com/wesleyel/war3parser"
+publish = false
 
 [lib]
 crate-type = ["cdylib", "rlib"]

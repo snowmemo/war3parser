@@ -18,23 +18,3 @@ jobs:
         with:
           command: check
           args: --all-features --benches --bins --examples --tests
-
-  build_wasm:
-    name: Build Wasm Module
-    runs-on: ubuntu-latest
-    needs: wasm32
-    steps:
-      - uses: actions/checkout@v2
-      - name: Install wasm-pack
-        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
-      - name: install just
-        uses: extractions/setup-just@v2
-      - run: just build-wasm
-      - run: rm dist/.gitignore
-      - name: Deploy
-        uses: s0/git-publish-subdir-action@develop
-        env:
-          REPO: self
-          BRANCH: compiled-wasm
-          FOLDER: dist
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
