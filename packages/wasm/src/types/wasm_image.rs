@@ -1,6 +1,5 @@
-use photon_rs::{to_image_data, PhotonImage};
 use war3parser::parser::w3x::War3Image;
-use wasm_bindgen::prelude::wasm_bindgen;
+use wasm_bindgen::{prelude::wasm_bindgen, Clamped};
 
 #[derive(Debug, Clone)]
 #[wasm_bindgen(getter_with_clone)]
@@ -12,9 +11,13 @@ pub struct WasmImage {
 
 impl From<War3Image> for WasmImage {
     fn from(image: War3Image) -> Self {
-        let data = image.data.clone().to_vec();
-        let photon_image = PhotonImage::new(data, image.width, image.height);
-        let image_data = to_image_data(photon_image);
+        let mut data = image.data.clone().to_vec();
+        let image_data = web_sys::ImageData::new_with_u8_clamped_array_and_sh(
+            Clamped(&mut data),
+            image.width,
+            image.height,
+        )
+        .unwrap();
         Self {
             width: image.width,
             height: image.height,

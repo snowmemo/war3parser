@@ -13,7 +13,6 @@ crate-type = ["cdylib", "rlib"]
 war3parser = { path = "../lib" }
 web-sys = { workspace = true, features = ["ImageData"] }
 wasm-bindgen = { workspace = true }
-photon-rs = { workspace = true }
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3.50"
