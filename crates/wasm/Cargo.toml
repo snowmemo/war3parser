@@ -1,6 +1,6 @@
 [package]
 name = "war3parser-wasm"
-version = "0.1.0"
+version = "0.1.1"
 edition.workspace = true
 description.workspace = true
 documentation.workspace = true
@@ -9,6 +9,7 @@ repository.workspace = true
 keywords.workspace = true
 categories.workspace = true
 license.workspace = true
+readme = "../../README.md"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
