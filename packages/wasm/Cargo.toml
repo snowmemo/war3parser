@@ -5,3 +5,6 @@ version.workspace = true
 
 [dependencies]
 war3parser = { path = "../lib" }
+web-sys = { workspace = true, features = ["ImageData"] }
+wasm-bindgen = { workspace = true }
+photon-rs = { workspace = true }

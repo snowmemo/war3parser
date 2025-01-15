@@ -12,7 +12,7 @@ use super::{
     wts::War3MapWts,
 };
 
-pub struct Image {
+pub struct War3Image {
     pub width: u32,
     pub height: u32,
     pub data: RgbaImage,
@@ -113,17 +113,17 @@ impl War3MapW3x {
         War3MapWts::load(&buffer)
     }
 
-    fn buffer_to_image(data: &[u8]) -> Result<Image, ParserError> {
+    fn buffer_to_image(data: &[u8]) -> Result<War3Image, ParserError> {
         if BlpImage::is_blp(&data) {
             let blp = BlpImage::load(&data)?;
-            Ok(Image {
+            Ok(War3Image {
                 width: blp.width,
                 height: blp.height,
                 data: blp.data,
             })
         } else if TgaImage::is_tga(&data) {
             let tga = TgaImage::load(&data)?;
-            Ok(Image {
+            Ok(War3Image {
                 width: tga.width,
                 height: tga.height,
                 data: tga.data,
@@ -133,7 +133,7 @@ impl War3MapW3x {
         }
     }
 
-    pub fn read_minimap(&mut self) -> Result<Image, ParserError> {
+    pub fn read_minimap(&mut self) -> Result<War3Image, ParserError> {
         let buffer = [
             "war3mapMap.tga",
             "war3mapMap.blp",
@@ -148,7 +148,7 @@ impl War3MapW3x {
         Self::buffer_to_image(&data)
     }
 
-    pub fn read_preview(&mut self) -> Result<Image, ParserError> {
+    pub fn read_preview(&mut self) -> Result<War3Image, ParserError> {
         let buffer = [
             "war3mapPreview.tga",
             "war3mapPreview.blp",
