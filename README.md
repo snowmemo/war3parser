@@ -1,6 +1,10 @@
 # war3parser
 
-[![JSR](https://jsr.io/badges/@wesleyel/war3parser)](https://jsr.io/@wesleyel/war3parser)
+![Crates.io Version](https://img.shields.io/crates/v/war3parser)
+![docs.rs](https://img.shields.io/docsrs/war3parser)
+![NPM Version](https://img.shields.io/npm/v/%40wesleyel%2Fwar3parser)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/wesleyel/war3parser/build.yml)
+![GitHub Release](https://img.shields.io/github/v/release/wesleyel/war3parser?label=war3parser-cli)
 
 `war3parser` is a library for parsing and extracting Warcraft III map files. It provides functionality to extract data from MPQ files and supports parsing various file formats.
 
@@ -12,13 +16,55 @@
 
 ## Usage
 
-### CLI
+### use as a library
 
-TODO
+```bash
+cargo add war3parser
+```
 
-### WASM
+```rust
+use war3parser::war3map_metadata::War3MapMetadata;
 
-TODO
+let metadata = War3MapMetadata::from_file("path/to/map.w3x").unwrap();
+
+println!("{:#?}", metadata);
+```
+
+### use as a CLI
+
+```bash
+cargo install war3parser-cli
+```
+
+```plaintext
+$ war3parser-cli --help
+A parser for Warcraft 3 map files
+
+Usage: war3parser-cli <COMMAND>
+
+Commands:
+  extract  A parser for Warcraft 3 map files [aliases: x]
+  list     A parser for Warcraft 3 map files [aliases: l]
+  help     Print this message or the help of the given subcommand(s)
+
+Options:
+  -h, --help     Print help
+  -V, --version  Print version
+```
+
+### use as a WASM
+
+```bash
+npm install @wesleyel/war3parser
+```
+
+```javascript
+import { WasmMapInfo } from "@wesleyel/war3parser";
+
+const mapInfo = WasmMapInfo.new(Uint8Array.from(buffer));
+
+console.log(mapInfo);
+```
 
 ## Contributing
 

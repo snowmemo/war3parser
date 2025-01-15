@@ -184,8 +184,8 @@ jobs:
           asset_content_type: application/gzip
           asset_name: ${{ env.RELEASE_BIN }}-${{ steps.get_version.outputs.VERSION }}-${{ env.MACOS_TARGET }}.tar.gz
 
-  release-lib:
-    name: GitHub war3parser lib Release
+  release-crates:
+    name: GitHub war3parser crates Release
     needs: build-cli
     runs-on: ubuntu-latest
     steps:
@@ -197,9 +197,10 @@ jobs:
       - uses: katyo/publish-crates@v2
         with:
           registry-token: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+          ignore-unpublished-changes: true
 
-  release-wasm:
-    name: GitHub war3parser wasm Release
+  release-npm:
+    name: GitHub war3parser npm Release
     needs: build-cli
     runs-on: ubuntu-latest
     steps:
