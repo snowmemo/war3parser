@@ -1,7 +1,5 @@
-use std::path::Path;
 
 use clap::{Parser, Subcommand};
-use war3parser::war3map_metadata::War3MapMetadata;
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]

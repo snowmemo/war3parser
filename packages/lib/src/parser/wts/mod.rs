@@ -15,10 +15,10 @@ pub struct War3MapWts {
 }
 
 impl War3MapWts {
-    pub fn load(buffer: &String) -> Result<Self, ParserError> {
+    pub fn load(buffer: &str) -> Result<Self, ParserError> {
         let re = Regex::new(STRINGS_RE)?;
         let mut string_map = HashMap::new();
-        for caps in re.captures_iter(buffer.as_str()) {
+        for caps in re.captures_iter(buffer) {
             let id = caps
                 .get(1)
                 .ok_or(ParserError::FailedToFindStrings)?

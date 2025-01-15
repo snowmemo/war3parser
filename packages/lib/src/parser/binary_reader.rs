@@ -39,8 +39,8 @@ impl AutoReadable for f32 {
 impl<T: AutoReadable + Default + Copy, const N: usize> AutoReadable for [T; N] {
     fn read(stream: &mut BinaryReader) -> Result<Self, ParserError> {
         let mut array = [T::default(); N];
-        for i in 0..N {
-            array[i] = T::read(stream)?;
+        for it in array.iter_mut().take(N) {
+            *it = T::read(stream)?;
         }
         Ok(array)
     }

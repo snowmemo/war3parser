@@ -25,7 +25,6 @@ impl TgaImage {
         let pattern = b"TRUEVISION-XFILE.\0";
         bytes
             .windows(pattern.len())
-            .position(|window| window == pattern)
-            .is_some()
+            .any(|window| window == pattern)
     }
 }
