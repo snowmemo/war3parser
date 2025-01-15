@@ -9,17 +9,17 @@
 //!
 //! ### Supported parse targets
 //!
-//! - W3X: [`parser::w3x::War3MapW3x`]
-//! - W3I: [`parser::w3i::War3MapW3i`]
-//! - WTS: [`parser::wts::War3MapWts`]
-//! - BLP: [`parser::blp::BlpImage`]
-//! - TGA: [`parser::tga::TgaImage`]
+//! - W3X: [`War3MapW3x`]
+//! - W3I: [`War3MapW3i`]
+//! - WTS: [`War3MapWts`]
+//! - BLP: [`BlpImage`]
+//! - TGA: [`TgaImage`]
 //!
-//! And a helper struct to include all supported metadata of a map file: [`war3map_metadata::War3MapMetadata`]
+//! And a helper struct to include all supported metadata of a map file: [`War3MapMetadata`]
 //!
 //! ### Implementation
 //!
-//! Most of the struct implemented [`parser::binary_reader::BinaryReadable`] trait, which provides a `load` function to load the struct from a binary reader.
+//! Most of the struct implemented [`BinaryReadable`] trait, which provides a `load` function to load the struct from a binary reader.
 //!
 //! We use the trait implementation chain to load the struct from a file.
 

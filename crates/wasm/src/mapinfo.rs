@@ -4,6 +4,11 @@ use web_sys::js_sys::Uint8Array;
 
 use crate::types::{wasm_image::WasmImage, wasm_w3i::WasmW3i};
 
+/// Map info for wasm
+/// 
+/// This struct contains the following fields:
+/// - `map_info`: [`WasmW3i`]
+/// - `images`: Vec of [`WasmImage`]
 #[wasm_bindgen(getter_with_clone)]
 pub struct WasmMapInfo {
     pub map_info: Option<WasmW3i>,
@@ -21,6 +26,7 @@ impl From<War3MapMetadata> for WasmMapInfo {
 
 #[wasm_bindgen]
 impl WasmMapInfo {
+    /// Create a new [`WasmMapInfo`] from a [`Uint8Array`] buffer
     pub fn new(buffer: Uint8Array) -> Option<Self> {
         let buffer_vec = buffer.to_vec();
 

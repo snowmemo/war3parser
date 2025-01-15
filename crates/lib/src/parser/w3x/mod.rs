@@ -21,6 +21,7 @@ pub struct War3Image {
     pub data: RgbaImage,
 }
 
+/// Warcraft 3 map entry
 pub struct War3MapW3x {
     pub u1: Option<u32>,
     pub name: Option<String>,
