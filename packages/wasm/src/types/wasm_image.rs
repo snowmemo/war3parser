@@ -11,9 +11,9 @@ pub struct WasmImage {
 
 impl From<War3Image> for WasmImage {
     fn from(image: War3Image) -> Self {
-        let mut data = image.data.clone().to_vec();
+        let data = image.data.clone().to_vec();
         let image_data = web_sys::ImageData::new_with_u8_clamped_array_and_sh(
-            Clamped(&mut data),
+            Clamped(&data),
             image.width,
             image.height,
         )
