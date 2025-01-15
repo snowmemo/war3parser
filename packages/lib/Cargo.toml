@@ -8,9 +8,6 @@ repository = "https://github.com/wesleyel/war3parser"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[lib]
-crate-type = ["cdylib", "rlib"]
-
 [dependencies]
 binary-reader = "0.4.5"
 image = { workspace = true }

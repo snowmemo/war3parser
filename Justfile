@@ -1,13 +1,21 @@
-clean:
+clean-wasm:
     rm -rf dist
     mkdir -p dist
 
-wasm-web:
-    wasm-pack build packages/lib --target web --out-dir ../../dist/web --scope wesleyel
+build-wasm: clean-wasm
+    wasm-pack build {{justfile_directory()}}/packages/wasm --target web --out-dir ../../dist --scope wesleyel
 
-publish-web:
-    cd dist/web && npm publish --access=public
+build-lib:
+    cd {{justfile_directory()}}/packages/lib && cargo build
 
-build: clean wasm-web
+build-cli:
+    cd {{justfile_directory()}}/packages/cli && cargo build
 
-publish: publish-web
+build: build-wasm build-lib build-cli
+
+lint:
+    cd {{justfile_directory()}} && cargo fmt --all
+    cd {{justfile_directory()}} && cargo clippy --all-targets --all-features -- -D warnings
+
+test:
+    cd {{justfile_directory()}} && cargo test --all-targets --all-features

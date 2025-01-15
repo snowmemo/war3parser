@@ -21,7 +21,6 @@ impl From<War3MapMetadata> for WasmMapInfo {
 
 #[wasm_bindgen]
 impl WasmMapInfo {
-    #[wasm_bindgen(constructor)]
     pub fn new(buffer: Uint8Array) -> Option<Self> {
         let buffer_vec = buffer.to_vec();
 

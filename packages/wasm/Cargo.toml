@@ -1,10 +1,19 @@
 [package]
 name = "war3parser-wasm"
+version = { workspace = true }
 edition = "2021"
-version.workspace = true
+description = "A parser for Warcraft 3 map files"
+license = "MIT"
+repository = "https://github.com/wesleyel/war3parser"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 war3parser = { path = "../lib" }
 web-sys = { workspace = true, features = ["ImageData"] }
 wasm-bindgen = { workspace = true }
 photon-rs = { workspace = true }
+
+[dev-dependencies]
+wasm-bindgen-test = "0.3.50"
