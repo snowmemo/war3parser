@@ -1,5 +1,6 @@
 use thiserror::Error;
 
+/// Custom error types
 #[derive(Error, Debug)]
 pub enum ParserError {
     #[error("Failed to find STRINGS")]

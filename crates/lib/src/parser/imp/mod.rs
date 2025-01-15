@@ -7,12 +7,14 @@ use super::{
     error::ParserError,
 };
 
+/// Import entry
 #[derive(serde::Serialize, serde::Deserialize)]
 pub struct Import {
     pub is_custom: u8,
     pub path: String,
 }
 
+/// Import table
 #[derive(Default)]
 pub struct War3MapImp {
     pub version: u32,

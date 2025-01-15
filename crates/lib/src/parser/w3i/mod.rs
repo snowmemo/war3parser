@@ -21,6 +21,9 @@ use {
     upgrade_availability_change::UpgradeAvailabilityChange,
 };
 
+/// Map info for `war3map.w3i` file
+///
+/// Special thanks to [mdx-m3-viewer](https://github.com/flowtsohg/mdx-m3-viewer) for the map info format
 #[derive(Debug, Serialize, Deserialize)]
 pub struct War3MapW3i {
     pub version: u32,
@@ -229,6 +232,7 @@ impl BinaryReadable for War3MapW3i {
 }
 
 impl War3MapW3i {
+    /// Get the build version of the map
     pub fn get_build_version(&self) -> u32 {
         match self.build_version {
             Some(version) => version[0] * 100 + version[1],
@@ -236,6 +240,7 @@ impl War3MapW3i {
         }
     }
 
+    /// Get the trigger string map
     pub fn trigger_string_map(&self) -> Result<HashMap<String, i32>, ParserError> {
         let re = Regex::new(TRAGGER_STR_RE)?;
         let json = serde_json::to_string(&self)?;

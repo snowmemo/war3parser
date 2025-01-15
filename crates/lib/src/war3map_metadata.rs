@@ -1,3 +1,15 @@
+//! Helper struct that includes all supported metadata of a map file
+//!
+//! # Usage
+//!
+//! ```rust
+//! use war3parser::war3map_metadata::War3MapMetadata;
+//!
+//! let metadata = War3MapMetadata::from_file("path/to/map.w3x").unwrap();
+//!
+//! println!("{:#?}", metadata);
+//! ```
+
 use crate::parser::{
     error::ParserError,
     imp::War3MapImp,
@@ -6,6 +18,8 @@ use crate::parser::{
     wts::War3MapWts,
 };
 
+/// If file exists and extracted successfully, the struct is `Some(..)`
+/// Otherwise, the struct is `None`
 pub struct War3MapMetadata {
     pub map_info: Option<War3MapW3i>,
     pub imp: Option<War3MapImp>,
@@ -14,6 +28,16 @@ pub struct War3MapMetadata {
 }
 
 impl War3MapMetadata {
+    /// Load metadata from a buffer
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use war3parser::war3map_metadata::War3MapMetadata;
+    ///
+    /// let buffer = std::fs::read("path/to/map.w3x").unwrap();
+    /// let metadata = War3MapMetadata::from_buffer(&buffer);
+    /// ```
     pub fn from(buffer: &[u8]) -> Option<Self> {
         if let Ok(w3x) = War3MapW3x::from_buffer(buffer) {
             let mut w3x_box = Box::new(w3x);

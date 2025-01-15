@@ -14,6 +14,7 @@ use super::{
     wts::War3MapWts,
 };
 
+/// Image with basic metadata and [`image::RgbaImage`] data
 pub struct War3Image {
     pub width: u32,
     pub height: u32,
@@ -26,7 +27,9 @@ pub struct War3MapW3x {
     pub flags: Option<u32>,
     pub max_players: Option<u32>,
 
+    /// MPQ archive
     pub archive: Archive,
+    /// List of files in `(listfile)`
     pub files: Option<Vec<String>>,
 }
 
@@ -58,17 +61,20 @@ impl BinaryReadable for War3MapW3x {
 }
 
 impl War3MapW3x {
+    /// Load a MPQ file from a path
     pub fn new(path: PathBuf) -> Result<Self, ParserError> {
         let buffer = std::fs::read(path)?;
         Self::from_buffer(&buffer)
     }
 
+    /// Load a MPQ file from a buffer
     pub fn from_buffer(buffer: &[u8]) -> Result<Self, ParserError> {
         let mut binary_reader = BinaryReader::from_u8(buffer);
         binary_reader.set_endian(Endian::Little);
         War3MapW3x::load(&mut binary_reader, 0)
     }
 
+    /// Get list of files in `(listfile)`
     pub fn get_file_names(archive: &mut Archive) -> Result<Vec<String>, ParserError> {
         let file = archive.open_file("(listfile)")?;
         let mut data = vec![0; file.size() as usize];
@@ -77,14 +83,17 @@ impl War3MapW3x {
         Ok(listfile.split("\r\n").map(|s| s.to_string()).collect())
     }
 
+    /// Get a file from the MPQ archive
     pub fn get(&mut self, filename: &str) -> Result<File, ParserError> {
         self.archive.open_file(filename).map_err(ParserError::from)
     }
 
+    /// Check if a file exists in the MPQ archive
     pub fn has(&mut self, filename: &str) -> bool {
         self.archive.open_file(filename).is_ok()
     }
 
+    /// Get the script file from the MPQ archive
     pub fn get_script_file(&mut self) -> Option<File> {
         [
             "war3map.j",
@@ -96,6 +105,7 @@ impl War3MapW3x {
         .find_map(|&filename| self.get(filename).ok())
     }
 
+    /// Read the `w3i` map info from the MPQ archive
     pub fn read_map_info(&mut self) -> Result<War3MapW3i, ParserError> {
         let file = self.get("war3map.w3i")?;
         let mut data = vec![0; file.size() as usize];
@@ -108,6 +118,7 @@ impl War3MapW3x {
         Ok(map_info)
     }
 
+    /// Read the `imp` map imports from the MPQ archive
     pub fn read_imports(&mut self) -> Result<War3MapImp, ParserError> {
         let file = self.get("war3map.imp")?;
         let mut data = vec![0; file.size() as usize];
@@ -118,6 +129,7 @@ impl War3MapW3x {
         War3MapImp::load(&mut reader, 0)
     }
 
+    /// Read the `wts` string table from the MPQ archive
     pub fn read_string_table(&mut self) -> Result<War3MapWts, ParserError> {
         let file = self.get("war3map.wts")?;
         let mut data = vec![0; file.size() as usize];
@@ -126,6 +138,7 @@ impl War3MapW3x {
         War3MapWts::load(&buffer)
     }
 
+    /// Convert a raw binary buffer to an [`War3Image`]
     fn buffer_to_image(data: &[u8]) -> Result<War3Image, ParserError> {
         if BlpImage::is_blp(&data) {
             let blp = BlpImage::load(&data)?;
@@ -146,6 +159,7 @@ impl War3MapW3x {
         }
     }
 
+    /// Read the minimap from the MPQ archive
     pub fn read_minimap(&mut self) -> Result<War3Image, ParserError> {
         let buffer = [
             "war3mapMap.tga",
@@ -161,6 +175,7 @@ impl War3MapW3x {
         Self::buffer_to_image(&data)
     }
 
+    /// Read the preview image from the MPQ archive
     pub fn read_preview(&mut self) -> Result<War3Image, ParserError> {
         let buffer = [
             "war3mapPreview.tga",

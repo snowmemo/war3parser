@@ -1,6 +1,8 @@
 use image::{codecs::tga::TgaDecoder, DynamicImage, RgbaImage};
 
 use super::error::ParserError;
+
+/// TGA image
 pub struct TgaImage {
     pub width: u32,
     pub height: u32,
@@ -8,6 +10,7 @@ pub struct TgaImage {
 }
 
 impl TgaImage {
+    /// Load a TGA image from a buffer
     pub fn load<T: AsRef<[u8]>>(buffer: &T) -> Result<Self, ParserError> {
         let cursor = std::io::Cursor::new(buffer);
         let decoder = TgaDecoder::new(cursor)?;
@@ -20,6 +23,7 @@ impl TgaImage {
         })
     }
 
+    /// Check if a buffer is a TGA image
     pub fn is_tga<T: AsRef<[u8]> + Sized>(buffer: &T) -> bool {
         let bytes = buffer.as_ref();
         let pattern = b"TRUEVISION-XFILE.\0";

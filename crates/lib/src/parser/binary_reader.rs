@@ -2,6 +2,9 @@ use binary_reader::BinaryReader;
 
 use crate::parser::error::ParserError;
 
+/// Trait to read a value from a binary reader, and parse it into a type.
+///
+/// This trait is implemented for most of the primitive types.
 pub trait AutoReadable: Sized {
     fn read(stream: &mut BinaryReader) -> Result<Self, ParserError>;
 }
@@ -46,6 +49,7 @@ impl<T: AutoReadable + Default + Copy, const N: usize> AutoReadable for [T; N] {
     }
 }
 
+/// Trait to load from binary array and parse it into a struct
 pub trait BinaryReadable: Sized {
     fn load(stream: &mut BinaryReader, version: u32) -> Result<Self, ParserError>;
     fn size(&self, _version: u32) -> usize {
