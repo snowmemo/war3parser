@@ -1,10 +1,14 @@
 [package]
 name = "war3parser"
-version = { workspace = true }
-edition = "2021"
-description = "A parser for Warcraft 3 map files"
-license = "MIT"
-repository = "https://github.com/wesleyel/war3parser"
+version = "0.1.0"
+edition.workspace = true
+description.workspace = true
+documentation.workspace = true
+homepage.workspace = true
+repository.workspace = true
+keywords.workspace = true
+categories.workspace = true
+license.workspace = true
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

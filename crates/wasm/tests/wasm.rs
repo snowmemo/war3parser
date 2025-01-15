@@ -4,7 +4,7 @@ use war3parser::{parser::w3x::War3MapW3x, war3map_metadata::War3MapMetadata};
 use wasm_bindgen_test::*;
 
 fn load_map() -> &'static [u8] {
-    include_bytes!("../../test_data/Legion_TD_11.1c_TeamOZE.w3x")
+    include_bytes!("../../../test_data/Legion_TD_11.1c_TeamOZE.w3x")
 }
 
 #[wasm_bindgen_test]

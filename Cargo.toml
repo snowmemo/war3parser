@@ -1,9 +1,17 @@
 [workspace]
 resolver = "2"
-members = ["packages/lib", "packages/cli", "packages/wasm"]
+members = ["crates/lib", "crates/cli", "crates/wasm"]
 
 [workspace.package]
-version = "0.1.0"
+edition = "2021"
+description = "A parser for Warcraft 3 map files"
+documentation = "https://docs.rs/war3parser"
+homepage = "https://github.com/wesleyel/war3parser"
+repository = "https://github.com/wesleyel/war3parser"
+keywords = ["warcraft3", "MPQ", "parser"]
+categories = ["wasm", "command-line-utilities"]
+license = "MIT"
+exclude = ["/test_data/"]
 
 [workspace.dependencies]
 image = "0.24.3"

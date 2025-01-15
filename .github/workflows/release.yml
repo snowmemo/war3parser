@@ -16,9 +16,9 @@ env:
 
   # Space separated paths to include in the archive.
   RELEASE_ADDS: README.md LICENSE
-  CLI_PATH: packages/cli
-  LIB_PATH: packages/lib
-  WASM_PATH: packages/wasm
+  CLI_PATH: crates/cli
+  LIB_PATH: crates/lib
+  WASM_PATH: crates/wasm
 
 jobs:
   build-cli:
