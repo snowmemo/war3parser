@@ -1,17 +1,18 @@
 use binary_reader::BinaryReader;
+use serde::{Deserialize, Serialize};
 
 use crate::parser::{
     binary_reader::{AutoReadable, BinaryReadable},
     error::ParserError,
 };
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct RandomUnit {
     pub chance: i32,
     pub ids: Vec<[u8; 4]>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct RandomUnitTable {
     pub id: i32,
     pub name: String,

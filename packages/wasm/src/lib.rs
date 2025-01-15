@@ -1,2 +1,2 @@
-pub mod types;
 pub mod mapinfo;
+pub mod types;

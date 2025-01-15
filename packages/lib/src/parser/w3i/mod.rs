@@ -5,11 +5,15 @@ pub mod random_unit_table;
 pub mod tech_availability_change;
 pub mod upgrade_availability_change;
 
+use std::collections::HashMap;
+
 use binary_reader::BinaryReader;
+use regex::Regex;
+use serde::{Deserialize, Serialize};
 
 use crate::parser::binary_reader::{AutoReadable, BinaryReadable};
 
-use super::error::ParserError;
+use super::{error::ParserError, wts::TRAGGER_STR_RE};
 
 use {
     force::Force, player::Player, random_item_table::RandomItemTable,
@@ -17,7 +21,7 @@ use {
     upgrade_availability_change::UpgradeAvailabilityChange,
 };
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct War3MapW3i {
     pub version: u32,
     pub saves: u32,
@@ -230,5 +234,24 @@ impl War3MapW3i {
             Some(version) => version[0] * 100 + version[1],
             None => 0,
         }
+    }
+
+    pub fn trigger_string_map(&self) -> Result<HashMap<String, i32>, ParserError> {
+        let re = Regex::new(TRAGGER_STR_RE)?;
+        let json = serde_json::to_string(&self)?;
+        let mut trigger_strings = HashMap::new();
+        for caps in re.captures_iter(json.as_str()) {
+            let original = caps.get(0).unwrap().as_str().to_string();
+            let id = match caps.get(1) {
+                Some(id) => id.as_str(),
+                None => "0",
+            };
+            if let Ok(id) = id.parse::<i32>() {
+                if id > 0 {
+                    trigger_strings.insert(original, id);
+                }
+            };
+        }
+        Ok(trigger_strings)
     }
 }

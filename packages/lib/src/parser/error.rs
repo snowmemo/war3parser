@@ -8,6 +8,8 @@ pub enum ParserError {
     FailedToFindMinimap,
     #[error("Map file {0} not found")]
     MapFileNotFound(String),
+    #[error("Failed to serialize map info")]
+    FailedToSerializeMapInfo,
     #[error("Failed to load image")]
     FailedToLoadImage(#[from] image::ImageError),
     #[error("Failed to load BLP image")]
@@ -20,5 +22,6 @@ pub enum ParserError {
     RegexError(#[from] regex::Error),
     #[error("From UTF-8 error")]
     FromUtf8Error(#[from] std::string::FromUtf8Error),
+    #[error("Failed to serialize")]
+    FailedToSerialize(#[from] serde_json::Error),
 }
-

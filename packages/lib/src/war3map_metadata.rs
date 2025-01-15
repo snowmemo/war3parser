@@ -2,6 +2,7 @@ use binary_reader::{BinaryReader, Endian};
 
 use crate::parser::{
     binary_reader::BinaryReadable,
+    error::ParserError,
     imp::War3MapImp,
     w3i::War3MapW3i,
     w3x::{War3Image, War3MapW3x},
@@ -39,5 +40,28 @@ impl War3MapMetadata {
         } else {
             None
         }
+    }
+
+    pub fn update_string_table(&mut self) -> Result<(), ParserError> {
+        let map_info = self
+            .map_info
+            .as_ref()
+            .ok_or(ParserError::MapFileNotFound("w3i".to_string()))?;
+        let mut map_info_json = serde_json::to_string(map_info)?;
+        let trigger_string_map = map_info.trigger_string_map()?;
+
+        let string_table = &self
+            .wts
+            .as_ref()
+            .ok_or(ParserError::MapFileNotFound("wts".to_string()))?
+            .string_map;
+        let default = String::new();
+
+        trigger_string_map.iter().for_each(|(key, value)| {
+            let replace_str = string_table.get(value).unwrap_or(&default);
+            map_info_json = map_info_json.replace(key, replace_str);
+        });
+
+        Ok(())
     }
 }

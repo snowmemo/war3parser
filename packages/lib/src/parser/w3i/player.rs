@@ -1,9 +1,10 @@
 use binary_reader::BinaryReader;
+use serde::{Deserialize, Serialize};
 
 use crate::parser::binary_reader::{AutoReadable, BinaryReadable};
 use crate::parser::error::ParserError;
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Player {
     pub id: i32,
     pub player_type: i32,

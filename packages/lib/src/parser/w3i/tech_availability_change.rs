@@ -1,11 +1,12 @@
 use binary_reader::BinaryReader;
+use serde::{Deserialize, Serialize};
 
 use crate::parser::{
     binary_reader::{AutoReadable, BinaryReadable},
     error::ParserError,
 };
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct TechAvailabilityChange {
     pub player_flags: u32,
     pub id: [u8; 4],
