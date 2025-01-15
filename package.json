@@ -1,0 +1,21 @@
+{
+  "name": "@wesleyel/war3parser-wasm",
+  "type": "module",
+  "description": "A parser for Warcraft 3 map files",
+  "version": "0.1.0",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wesleyel/war3parser"
+  },
+  "files": [
+    "war3parser_bg.wasm",
+    "war3parser.js",
+    "war3parser.d.ts"
+  ],
+  "main": "war3parser.js",
+  "types": "war3parser.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}
