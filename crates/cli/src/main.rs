@@ -36,6 +36,17 @@ enum Command {
         keep_ori: bool,
     },
 
+    /// Convert a *tga/blp file to png
+    #[command(visible_alias = "c")]
+    ConvertImage {
+        /// Path to the image file
+        image_path: String,
+
+        /// Path to the output directory
+        #[arg(short, long)]
+        out_dir: Option<String>,
+    },
+
     /// List files in a MPQ archive
     #[command(visible_alias = "l")]
     ListFiles {
@@ -60,7 +71,7 @@ fn save_file(file_name: &str, out_dir: &Path, file_content: &[u8]) -> anyhow::Re
     Ok(())
 }
 
-fn main() {
+fn main() -> anyhow::Result<()> {
     let args = Command::parse();
     match args {
         Command::ExtractFile {
@@ -71,17 +82,20 @@ fn main() {
             let map_path = Path::new(&map_path);
             let out_dir = Path::new(&out_dir);
 
-            let mut w3x =
-                War3MapW3x::new(map_path.to_path_buf()).expect("Failed to parse map file");
-            let file_content =
-                extract_file_buffer(&mut w3x, &file_name).expect("Failed to extract file");
-            save_file(&file_name, out_dir, &file_content).expect("Failed to save file");
+            let mut w3x = War3MapW3x::new(map_path.to_path_buf())?;
+            let file_content = extract_file_buffer(&mut w3x, &file_name)?;
+            save_file(&file_name, out_dir, &file_content)?;
+            println!("✅ Extracted file: {}", file_name);
+            Ok(())
         }
         Command::ListFiles { map_path } => {
             let map_path = Path::new(&map_path);
-            let w3x = War3MapW3x::new(map_path.to_path_buf()).expect("Failed to parse map file");
-            let files = w3x.files.expect("Failed to get files from MPQ");
+            let w3x = War3MapW3x::new(map_path.to_path_buf())?;
+            let files = w3x
+                .files
+                .ok_or(anyhow::anyhow!("Failed to get files from MPQ"))?;
             println!("{:#?}", files);
+            Ok(())
         }
         Command::ExtractImages {
             map_path,
@@ -129,6 +143,29 @@ fn main() {
                         Err(e) => println!("❌ Failed to extract '{}': {}", file, e),
                     },
                 );
+            Ok(())
+        }
+        Command::ConvertImage {
+            image_path,
+            out_dir,
+        } => {
+            let image_path = Path::new(&image_path);
+            let file_content = std::fs::read(image_path)?;
+
+            let image = War3MapW3x::buffer_to_image(&file_content)?;
+            let out_file_path = if let Some(out_dir) = out_dir {
+                Path::new(&out_dir).join(
+                    image_path
+                        .with_extension("png")
+                        .file_name()
+                        .ok_or(anyhow::anyhow!("Failed to get file name"))?,
+                )
+            } else {
+                image_path.with_extension("png")
+            };
+            image.data.save(&out_file_path)?;
+            println!("✅ Converted image: {}", out_file_path.display());
+            Ok(())
         }
     }
 }

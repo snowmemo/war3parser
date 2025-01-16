@@ -163,8 +163,8 @@ impl War3MapW3x {
         let buffer = [
             "war3mapMap.tga",
             "war3mapMap.blp",
-            "war3mappreview.tga",
-            "war3mappreview.blp",
+            "war3mapmap.tga",
+            "war3mapmap.blp",
         ]
         .iter()
         .find_map(|&filename| self.get(filename).ok())
