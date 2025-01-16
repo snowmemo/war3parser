@@ -42,6 +42,7 @@ A extractor and parser for Warcraft 3 map files
 Usage: war3parser-cli <COMMAND>
 
 Commands:
+  dump-metadata   Dump metadata from a map file [aliases: d]
   extract-file    Extract a file from a MPQ archive and save it [aliases: x]
   extract-images  Extract images with *.tga and *.blp extensions [aliases: i]
   convert-image   Convert a *tga/blp file to png [aliases: c]
