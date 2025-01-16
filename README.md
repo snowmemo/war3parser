@@ -37,15 +37,16 @@ cargo install war3parser-cli
 ```
 
 ```plaintext
-$ war3parser-cli --help
+$ war3parser-cli help
 A parser for Warcraft 3 map files
 
 Usage: war3parser-cli <COMMAND>
 
 Commands:
-  extract  A parser for Warcraft 3 map files [aliases: x]
-  list     A parser for Warcraft 3 map files [aliases: l]
-  help     Print this message or the help of the given subcommand(s)
+  extract-file    Extract a file from a MPQ archive and save it [aliases: x]
+  extract-images  Extract images with *.tga and *.blp extensions [aliases: i]
+  list-files      List files in a MPQ archive [aliases: l]
+  help            Print this message or the help of the given subcommand(s)
 
 Options:
   -h, --help     Print help
