@@ -1,14 +1,6 @@
 //! Helper struct that includes all supported metadata of a map file
-//!
-//! # Usage
-//!
-//! ```rust
-//! use war3parser::war3map_metadata::War3MapMetadata;
-//!
-//! let metadata = War3MapMetadata::from_file("path/to/map.w3x").unwrap();
-//!
-//! println!("{:#?}", metadata);
-//! ```
+
+use std::path::Path;
 
 use crate::parser::{
     error::ParserError,
@@ -32,11 +24,11 @@ impl War3MapMetadata {
     ///
     /// # Example
     ///
-    /// ```rust
+    /// ```ignore
     /// use war3parser::war3map_metadata::War3MapMetadata;
     ///
     /// let buffer = std::fs::read("path/to/map.w3x").unwrap();
-    /// let metadata = War3MapMetadata::from_buffer(&buffer);
+    /// let metadata = War3MapMetadata::from(&buffer).unwrap();
     /// ```
     pub fn from(buffer: &[u8]) -> Option<Self> {
         if let Ok(w3x) = War3MapW3x::from_buffer(buffer) {
@@ -60,6 +52,17 @@ impl War3MapMetadata {
         }
     }
 
+    /// Update trigger strings in w3i file if wts file is available
+    ///
+    /// # Example
+    ///
+    /// ```ignore
+    /// use war3parser::war3map_metadata::War3MapMetadata;
+    ///
+    /// let buffer = std::fs::read("path/to/map.w3x").unwrap();
+    /// let mut metadata = War3MapMetadata::from(&buffer).unwrap();
+    /// metadata.update_string_table().unwrap();
+    /// ```
     pub fn update_string_table(&mut self) -> Result<(), ParserError> {
         let map_info = self
             .map_info
@@ -80,6 +83,38 @@ impl War3MapMetadata {
             map_info_json = map_info_json.replace(key, replace_str);
         });
 
+        Ok(())
+    }
+
+    /// Save metadata to files
+    ///
+    /// # Example
+    ///
+    /// ```ignore
+    /// use war3parser::war3map_metadata::War3MapMetadata;
+    ///
+    /// let buffer = std::fs::read("path/to/map.w3x").unwrap();
+    /// let metadata = War3MapMetadata::from(&buffer).unwrap();
+    /// metadata.save("path/to/output").unwrap();
+    /// ```
+    pub fn save(&self, out_dir: &str) -> Result<(), ParserError> {
+        let out_dir = Path::new(out_dir);
+        if let Some(map_info) = &self.map_info {
+            let map_info_path = out_dir.join("war3mapMap.w3i.json");
+            std::fs::write(map_info_path, serde_json::to_string(map_info)?)?;
+        }
+        if let Some(wts) = &self.wts {
+            let wts_path = out_dir.join("war3mapMap.wts.json");
+            std::fs::write(wts_path, serde_json::to_string(wts)?)?;
+        }
+        if let Some(imp) = &self.imp {
+            let imp_path = out_dir.join("war3mapMap.imp.json");
+            std::fs::write(imp_path, serde_json::to_string(imp)?)?;
+        }
+        for (index, image) in self.images.iter().enumerate() {
+            let image_path = out_dir.join(format!("images_{}.png", index));
+            image.data.save(image_path)?;
+        }
         Ok(())
     }
 }

@@ -25,9 +25,8 @@ cargo add war3parser
 ```rust
 use war3parser::war3map_metadata::War3MapMetadata;
 
-let metadata = War3MapMetadata::from_file("path/to/map.w3x").unwrap();
-
-println!("{:#?}", metadata);
+let buffer = std::fs::read("path/to/map.w3x").unwrap();
+let metadata = War3MapMetadata::from(&buffer);
 ```
 
 ### use as a CLI

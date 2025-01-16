@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use binary_reader::BinaryReader;
+use serde::{Deserialize, Serialize};
 
 use super::{
     binary_reader::{AutoReadable, BinaryReadable},
@@ -8,14 +9,14 @@ use super::{
 };
 
 /// Import entry
-#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Import {
     pub is_custom: u8,
     pub path: String,
 }
 
 /// Import table
-#[derive(Default)]
+#[derive(Debug, Default, Serialize, Deserialize)]
 pub struct War3MapImp {
     pub version: u32,
     pub entries: HashMap<String, Import>,
