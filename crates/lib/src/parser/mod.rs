@@ -24,12 +24,6 @@ pub mod blp;
 
 #[doc(inline)]
 pub use {
-    imp::War3MapImp,
-    w3i::War3MapW3i,
-    wts::War3MapWts,
-    w3x::War3MapW3x,
-    tga::TgaImage,
-    blp::BlpImage,
-    binary_reader::BinaryReadable,
-    error::ParserError,
+    binary_reader::BinaryReadable, blp::BlpImage, error::ParserError, imp::War3MapImp,
+    tga::TgaImage, w3i::War3MapW3i, w3x::War3MapW3x, wts::War3MapWts,
 };

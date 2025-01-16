@@ -140,23 +140,21 @@ impl War3MapW3x {
     }
 
     /// Convert a raw binary buffer to an [`War3Image`]
-    fn buffer_to_image(data: &[u8]) -> Result<War3Image, ParserError> {
-        if BlpImage::is_blp(&data) {
-            let blp = BlpImage::load(&data)?;
+    pub fn buffer_to_image(data: &[u8]) -> Result<War3Image, ParserError> {
+        if let Ok(blp) = BlpImage::load(&data) {
             Ok(War3Image {
                 width: blp.width,
                 height: blp.height,
                 data: blp.data,
             })
-        } else if TgaImage::is_tga(&data) {
-            let tga = TgaImage::load(&data)?;
+        } else if let Ok(tga) = TgaImage::load(&data) {
             Ok(War3Image {
                 width: tga.width,
                 height: tga.height,
                 data: tga.data,
             })
         } else {
-            Err(ParserError::FailedToFindMinimap)
+            Err(ParserError::FailedToConvertBufferToImage)
         }
     }
 

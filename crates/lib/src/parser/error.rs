@@ -5,8 +5,8 @@ use thiserror::Error;
 pub enum ParserError {
     #[error("Failed to find STRINGS")]
     FailedToFindStrings,
-    #[error("Failed to find minimap")]
-    FailedToFindMinimap,
+    #[error("Failed to convert buffer to image")]
+    FailedToConvertBufferToImage,
     #[error("Map file {0} not found")]
     MapFileNotFound(String),
     #[error("Failed to serialize map info")]

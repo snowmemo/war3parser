@@ -34,12 +34,12 @@ pub use war3map_metadata::War3MapMetadata;
 
 #[doc(inline)]
 pub use parser::{
+    binary_reader::BinaryReadable,
+    blp::BlpImage,
     error::ParserError,
     imp::War3MapImp,
+    tga::TgaImage,
     w3i::War3MapW3i,
     w3x::{War3Image, War3MapW3x},
     wts::War3MapWts,
-    binary_reader::BinaryReadable,
-    blp::BlpImage,
-    tga::TgaImage,
 };

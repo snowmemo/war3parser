@@ -21,10 +21,4 @@ impl BlpImage {
             data: image.to_rgba8(),
         })
     }
-
-    /// Check if a buffer is a BLP image
-    pub fn is_blp<T: AsRef<[u8]> + Sized>(buffer: &T) -> bool {
-        let bytes = buffer.as_ref();
-        bytes[0] == 0x42 && bytes[1] == 0x4C && bytes[2] == 0x50 && bytes[3] == 0x30
-    }
 }

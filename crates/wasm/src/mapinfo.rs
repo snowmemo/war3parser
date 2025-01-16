@@ -5,7 +5,7 @@ use web_sys::js_sys::Uint8Array;
 use crate::types::{wasm_image::WasmImage, wasm_w3i::WasmW3i};
 
 /// Map info for wasm
-/// 
+///
 /// This struct contains the following fields:
 /// - `map_info`: [`WasmW3i`]
 /// - `images`: Vec of [`WasmImage`]

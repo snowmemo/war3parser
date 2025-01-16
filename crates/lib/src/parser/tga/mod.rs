@@ -22,11 +22,4 @@ impl TgaImage {
             data: image.to_rgba8(),
         })
     }
-
-    /// Check if a buffer is a TGA image
-    pub fn is_tga<T: AsRef<[u8]> + Sized>(buffer: &T) -> bool {
-        let bytes = buffer.as_ref();
-        let pattern = b"TRUEVISION-XFILE.\0";
-        bytes.windows(pattern.len()).any(|window| window == pattern)
-    }
 }
