@@ -1,11 +1,22 @@
 use std::path::Path;
 
 use clap::Parser;
-use war3parser::parser::w3x::War3MapW3x;
+use war3parser::{parser::w3x::War3MapW3x, War3MapMetadata};
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
 enum Command {
+    /// Dump metadata from a map file
+    #[command(visible_alias = "d")]
+    DumpMetadata {
+        /// Path to the MPQ archive
+        map_path: String,
+
+        /// Path to the output directory
+        #[arg(short, long, default_value = ".")]
+        out_dir: String,
+    },
+
     /// Extract a file from a MPQ archive and save it
     #[command(visible_alias = "x")]
     ExtractFile {
@@ -165,6 +176,30 @@ fn main() -> anyhow::Result<()> {
             };
             image.data.save(&out_file_path)?;
             println!("✅ Converted image: {}", out_file_path.display());
+            Ok(())
+        }
+        Command::DumpMetadata { map_path, out_dir } => {
+            let map_path = Path::new(&map_path);
+            let out_dir = Path::new(&out_dir);
+            if !out_dir.exists() {
+                std::fs::create_dir_all(out_dir)?;
+            }
+            let buffer = std::fs::read(map_path)?;
+            let mut metadata = War3MapMetadata::from(&buffer).ok_or(anyhow::anyhow!(
+                "Failed to parse metadata from '{}'",
+                map_path.display()
+            ))?;
+            metadata.update_string_table()?;
+            metadata.save(
+                out_dir
+                    .to_str()
+                    .ok_or(anyhow::anyhow!("Failed to get output directory"))?,
+            )?;
+            println!(
+                "✅ Dumped '{}' metadata to '{}'",
+                map_path.display(),
+                out_dir.display()
+            );
             Ok(())
         }
     }

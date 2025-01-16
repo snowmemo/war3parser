@@ -101,15 +101,15 @@ impl War3MapMetadata {
         let out_dir = Path::new(out_dir);
         if let Some(map_info) = &self.map_info {
             let map_info_path = out_dir.join("war3mapMap.w3i.json");
-            std::fs::write(map_info_path, serde_json::to_string(map_info)?)?;
+            std::fs::write(map_info_path, serde_json::to_string_pretty(map_info)?)?;
         }
         if let Some(wts) = &self.wts {
             let wts_path = out_dir.join("war3mapMap.wts.json");
-            std::fs::write(wts_path, serde_json::to_string(wts)?)?;
+            std::fs::write(wts_path, serde_json::to_string_pretty(wts)?)?;
         }
         if let Some(imp) = &self.imp {
             let imp_path = out_dir.join("war3mapMap.imp.json");
-            std::fs::write(imp_path, serde_json::to_string(imp)?)?;
+            std::fs::write(imp_path, serde_json::to_string_pretty(imp)?)?;
         }
         for (index, image) in self.images.iter().enumerate() {
             let image_path = out_dir.join(format!("images_{}.png", index));

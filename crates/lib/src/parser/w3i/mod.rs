@@ -241,6 +241,8 @@ impl War3MapW3i {
     }
 
     /// Get the trigger string map
+    ///
+    /// TODO: fix bug where trigger strings are not parsed correctly
     pub fn trigger_string_map(&self) -> Result<HashMap<String, i32>, ParserError> {
         let re = Regex::new(TRAGGER_STR_RE)?;
         let json = serde_json::to_string(&self)?;
