@@ -19,6 +19,7 @@ pub struct War3Image {
     pub width: u32,
     pub height: u32,
     pub data: RgbaImage,
+    pub filename: String,
 }
 
 /// Warcraft 3 map entry
@@ -32,6 +33,29 @@ pub struct War3MapW3x {
     pub archive: Archive,
     /// List of files in `(listfile)`
     pub files: Option<Vec<String>>,
+}
+
+impl War3Image {
+    /// Convert a raw binary buffer to an [`War3Image`]
+    pub fn from_buffer(filename: &str, data: &[u8]) -> Result<Self, ParserError> {
+        if let Ok(blp) = BlpImage::load(&data) {
+            Ok(Self {
+                width: blp.width,
+                height: blp.height,
+                data: blp.data,
+                filename: filename.to_string(),
+            })
+        } else if let Ok(tga) = TgaImage::load(&data) {
+            Ok(Self {
+                width: tga.width,
+                height: tga.height,
+                data: tga.data,
+                filename: filename.to_string(),
+            })
+        } else {
+            Err(ParserError::FailedToConvertBufferToImage)
+        }
+    }
 }
 
 impl BinaryReadable for War3MapW3x {
@@ -139,54 +163,37 @@ impl War3MapW3x {
         War3MapWts::load(&buffer)
     }
 
-    /// Convert a raw binary buffer to an [`War3Image`]
-    pub fn buffer_to_image(data: &[u8]) -> Result<War3Image, ParserError> {
-        if let Ok(blp) = BlpImage::load(&data) {
-            Ok(War3Image {
-                width: blp.width,
-                height: blp.height,
-                data: blp.data,
-            })
-        } else if let Ok(tga) = TgaImage::load(&data) {
-            Ok(War3Image {
-                width: tga.width,
-                height: tga.height,
-                data: tga.data,
-            })
-        } else {
-            Err(ParserError::FailedToConvertBufferToImage)
-        }
-    }
-
     /// Read the minimap from the MPQ archive
     pub fn read_minimap(&mut self) -> Result<War3Image, ParserError> {
-        let buffer = [
+        let filename = [
             "war3mapMap.tga",
             "war3mapMap.blp",
             "war3mapmap.tga",
             "war3mapmap.blp",
         ]
         .iter()
-        .find_map(|&filename| self.get(filename).ok())
+        .find(|&filename| self.get(filename).is_ok())
         .ok_or(ParserError::MapFileNotFound("war3mapMap".to_string()))?;
+        let buffer = self.get(filename)?;
         let mut data = vec![0; buffer.size() as usize];
         buffer.read(&mut self.archive, &mut data)?;
-        Self::buffer_to_image(&data)
+        War3Image::from_buffer(filename, &data)
     }
 
     /// Read the preview image from the MPQ archive
     pub fn read_preview(&mut self) -> Result<War3Image, ParserError> {
-        let buffer = [
+        let filename = [
             "war3mapPreview.tga",
             "war3mapPreview.blp",
             "war3mappreview.tga",
             "war3mappreview.blp",
         ]
         .iter()
-        .find_map(|&filename| self.get(filename).ok())
+        .find(|&filename| self.get(filename).is_ok())
         .ok_or(ParserError::MapFileNotFound("war3mapPreview".to_string()))?;
+        let buffer = self.get(filename)?;
         let mut data = vec![0; buffer.size() as usize];
         buffer.read(&mut self.archive, &mut data)?;
-        Self::buffer_to_image(&data)
+        War3Image::from_buffer(filename, &data)
     }
 }

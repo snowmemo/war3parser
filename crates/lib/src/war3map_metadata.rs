@@ -119,7 +119,7 @@ impl War3MapMetadata {
             std::fs::write(imp_path, serde_json::to_string_pretty(imp)?)?;
         }
         for (index, image) in self.images.iter().enumerate() {
-            let image_path = out_dir.join(format!("images_{}.png", index));
+            let image_path = out_dir.join(format!("{}_{}.png", image.filename, index));
             image.data.save(image_path)?;
         }
         Ok(())

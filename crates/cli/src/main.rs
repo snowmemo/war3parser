@@ -1,7 +1,7 @@
 use std::path::Path;
 
 use clap::Parser;
-use war3parser::{parser::w3x::War3MapW3x, War3MapMetadata};
+use war3parser::{parser::w3x::War3MapW3x, War3Image, War3MapMetadata};
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
@@ -51,7 +51,7 @@ enum Command {
     #[command(visible_alias = "c")]
     ConvertImage {
         /// Path to the image file
-        image_path: String,
+        file_name: String,
 
         /// Path to the output directory
         #[arg(short, long)]
@@ -131,7 +131,7 @@ fn main() -> anyhow::Result<()> {
                 if keep_ori {
                     save_file(file, out_dir, &file_content)?;
                 } else {
-                    let image = War3MapW3x::buffer_to_image(&file_content)?;
+                    let image = War3Image::from_buffer(file, &file_content)?;
                     let out_file_path = out_dir.join(
                         file.replace("\\", "/")
                             .replace(".blp", ".png")
@@ -156,14 +156,11 @@ fn main() -> anyhow::Result<()> {
                 );
             Ok(())
         }
-        Command::ConvertImage {
-            image_path,
-            out_dir,
-        } => {
-            let image_path = Path::new(&image_path);
+        Command::ConvertImage { file_name, out_dir } => {
+            let image_path = Path::new(&file_name);
             let file_content = std::fs::read(image_path)?;
 
-            let image = War3MapW3x::buffer_to_image(&file_content)?;
+            let image = War3Image::from_buffer(&file_name, &file_content)?;
             let out_file_path = if let Some(out_dir) = out_dir {
                 Path::new(&out_dir).join(
                     image_path
@@ -189,7 +186,7 @@ fn main() -> anyhow::Result<()> {
                 "Failed to parse metadata from '{}'",
                 map_path.display()
             ))?;
-            metadata.update_string_table()?;
+            metadata.update_string_table().ok();
             metadata.save(
                 out_dir
                     .to_str()
