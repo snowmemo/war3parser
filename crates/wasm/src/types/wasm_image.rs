@@ -7,6 +7,7 @@ pub struct WasmImage {
     pub width: u32,
     pub height: u32,
     pub data: web_sys::ImageData,
+    pub filename: String,
 }
 
 impl From<War3Image> for WasmImage {
@@ -22,6 +23,7 @@ impl From<War3Image> for WasmImage {
             width: image.width,
             height: image.height,
             data: image_data,
+            filename: image.filename,
         }
     }
 }

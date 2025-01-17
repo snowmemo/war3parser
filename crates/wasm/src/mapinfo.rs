@@ -1,6 +1,6 @@
 use war3parser::war3map_metadata::War3MapMetadata;
 use wasm_bindgen::prelude::wasm_bindgen;
-use web_sys::js_sys::Uint8Array;
+use web_sys::js_sys::{self, Uint8Array};
 
 use crate::types::{wasm_image::WasmImage, wasm_w3i::WasmW3i};
 
@@ -33,7 +33,7 @@ impl WasmMapInfo {
         match War3MapMetadata::from(&buffer_vec) {
             Some(mut metadata) => {
                 // safe to unwrap because it is ok to fail
-                metadata.update_string_table().unwrap_or(());
+                metadata.update_string_table().ok();
                 Some(Self::from(metadata))
             }
             None => None,
