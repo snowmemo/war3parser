@@ -52,7 +52,7 @@ impl War3MapMetadata {
         }
     }
 
-    /// Update trigger strings in w3i file if wts file is available
+    /// Update trigger strings in `w3i` file if `wts` file is available
     ///
     /// # Example
     ///
@@ -68,7 +68,7 @@ impl War3MapMetadata {
             .map_info
             .as_ref()
             .ok_or(ParserError::MapFileNotFound("w3i".to_string()))?;
-        let mut map_info_json = serde_json::to_string(map_info)?;
+        let mut map_info_json = serde_json::to_string_pretty(map_info)?;
         let trigger_string_map = map_info.trigger_string_map()?;
 
         let string_table = &self
@@ -76,12 +76,19 @@ impl War3MapMetadata {
             .as_ref()
             .ok_or(ParserError::MapFileNotFound("wts".to_string()))?
             .string_map;
-        let default = String::new();
 
-        trigger_string_map.iter().for_each(|(key, value)| {
-            let replace_str = string_table.get(value).unwrap_or(&default);
-            map_info_json = map_info_json.replace(key, replace_str);
-        });
+        let default = "Unknown".to_string();
+
+        trigger_string_map.iter().try_for_each(
+            |(key, value)| -> Result<(), serde_json::Error> {
+                let replace_str = string_table.get(value).unwrap_or(&default);
+                let replace_str = serde_json::to_string(replace_str)?;
+                map_info_json = map_info_json.replace(key, replace_str.as_str());
+                Ok(())
+            },
+        )?;
+
+        self.map_info = Some(serde_json::from_str(&map_info_json)?);
 
         Ok(())
     }

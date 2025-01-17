@@ -5,11 +5,8 @@ use serde::{Deserialize, Serialize};
 
 use super::error::ParserError;
 
-/// TRIGSTR_007 / TRIGSTR_007ab / TRIGSTR_7 TRIGSTR_-007
-pub const TRAGGER_STR_RE: &str = r"TRIGSTR_(-?\d+)(?:\w+)?";
-
 /// STRING_007
-pub const STRINGS_RE: &str = r"STRING\s+([0-9]+)\s+\{\r\n+([^\}]*)\r\n\}";
+const STRINGS_RE: &str = r"STRING\s+([0-9]+)\s+\{\r\n+([^\}]*)\r\n\}";
 
 /// String table
 #[derive(Debug, Serialize, Deserialize)]
@@ -25,12 +22,12 @@ impl War3MapWts {
         for caps in re.captures_iter(buffer) {
             let id = caps
                 .get(1)
-                .ok_or(ParserError::FailedToFindStrings)?
+                .ok_or(ParserError::FailedToFindRegex(STRINGS_RE.to_string()))?
                 .as_str()
                 .to_string();
             let content = String::from(
                 caps.get(2)
-                    .ok_or(ParserError::FailedToFindStrings)?
+                    .ok_or(ParserError::FailedToFindRegex(STRINGS_RE.to_string()))?
                     .as_str(),
             );
             if let Ok(id) = id.parse::<i32>() {

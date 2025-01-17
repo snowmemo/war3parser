@@ -13,7 +13,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::parser::binary_reader::{AutoReadable, BinaryReadable};
 
-use super::{error::ParserError, wts::TRAGGER_STR_RE};
+use super::error::ParserError;
 
 use {
     force::Force, player::Player, random_item_table::RandomItemTable,
@@ -231,6 +231,9 @@ impl BinaryReadable for War3MapW3i {
     }
 }
 
+/// "TRIGSTR_007" / "TRIGSTR_007ab" / "TRIGSTR_7" / "TRIGSTR_-007"
+const TRAGGER_STR_RE: &str = r#""TRIGSTR_(-?\d+)(?:\w+)?""#;
+
 impl War3MapW3i {
     /// Get the build version of the map
     pub fn get_build_version(&self) -> u32 {
@@ -241,22 +244,20 @@ impl War3MapW3i {
     }
 
     /// Get the trigger string map
-    ///
-    /// TODO: fix bug where trigger strings are not parsed correctly
     pub fn trigger_string_map(&self) -> Result<HashMap<String, i32>, ParserError> {
         let re = Regex::new(TRAGGER_STR_RE)?;
         let json = serde_json::to_string(&self)?;
         let mut trigger_strings = HashMap::new();
         for caps in re.captures_iter(json.as_str()) {
-            let original = caps.get(0).unwrap().as_str().to_string();
-            let id = match caps.get(1) {
-                Some(id) => id.as_str(),
-                None => "0",
-            };
-            if let Ok(id) = id.parse::<i32>() {
-                if id > 0 {
+            let original = caps
+                .get(0)
+                .ok_or(ParserError::FailedToFindRegex(TRAGGER_STR_RE.to_string()))?
+                .as_str()
+                .to_string();
+            if let Some(id) = caps.get(1) {
+                if let Ok(id) = id.as_str().parse::<i32>() {
                     trigger_strings.insert(original, id);
-                }
+                };
             };
         }
         Ok(trigger_strings)

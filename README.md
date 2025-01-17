@@ -26,7 +26,9 @@ cargo add war3parser
 use war3parser::war3map_metadata::War3MapMetadata;
 
 let buffer = std::fs::read("path/to/map.w3x").unwrap();
-let metadata = War3MapMetadata::from(&buffer);
+let metadata = War3MapMetadata::from(&buffer).unwrap();
+
+metadata.save("out");
 ```
 
 ### use as a CLI

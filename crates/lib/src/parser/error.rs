@@ -3,8 +3,8 @@ use thiserror::Error;
 /// Custom error types
 #[derive(Error, Debug)]
 pub enum ParserError {
-    #[error("Failed to find STRINGS")]
-    FailedToFindStrings,
+    #[error("Failed to find regex: {0}")]
+    FailedToFindRegex(String),
     #[error("Failed to convert buffer to image")]
     FailedToConvertBufferToImage,
     #[error("Map file {0} not found")]
