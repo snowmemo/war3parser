@@ -806,10 +806,10 @@ dependencies = [
 name = "war3parser-wasm"
 version = "0.2.0"
 dependencies = [
+ "js-sys",
  "war3parser",
  "wasm-bindgen",
  "wasm-bindgen-test",
- "web-sys",
 ]
 
 [[package]]

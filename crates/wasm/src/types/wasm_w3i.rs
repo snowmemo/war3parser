@@ -1,3 +1,4 @@
+use js_sys::{Float32Array, Uint32Array, Uint8Array};
 use war3parser::parser::w3i::{
     force::Force,
     player::Player,
@@ -8,7 +9,6 @@ use war3parser::parser::w3i::{
     War3MapW3i,
 };
 use wasm_bindgen::prelude::wasm_bindgen;
-use web_sys::js_sys::{Float32Array, Uint32Array, Uint8Array};
 
 use super::utils::{f32_array_to_float32array, u32_array_to_uint32array, u8_array_to_uint8array};
 

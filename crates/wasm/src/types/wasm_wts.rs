@@ -1,6 +1,6 @@
+use js_sys;
 use war3parser::parser::wts::War3MapWts;
 use wasm_bindgen::prelude::wasm_bindgen;
-use web_sys::js_sys;
 
 use super::utils::hashmap_to_js_map;
 

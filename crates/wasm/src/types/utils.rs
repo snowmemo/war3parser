@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
+use js_sys::{self, Float32Array, Int32Array, Uint32Array, Uint8Array};
 use wasm_bindgen::JsValue;
-use web_sys::js_sys::{self, Float32Array, Int32Array, Uint32Array, Uint8Array};
 
 pub fn u32_array_to_uint32array<const N: usize>(array: [u32; N]) -> Uint32Array {
     let new_array = Uint32Array::new_with_length(N as u32);
