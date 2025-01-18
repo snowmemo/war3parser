@@ -16,8 +16,6 @@ use super::{
 
 /// Image with basic metadata and [`image::RgbaImage`] data
 pub struct War3Image {
-    pub width: u32,
-    pub height: u32,
     pub data: RgbaImage,
     pub filename: String,
 }
@@ -40,15 +38,11 @@ impl War3Image {
     pub fn from_buffer(filename: &str, data: &[u8]) -> Result<Self, ParserError> {
         if let Ok(blp) = BlpImage::load(&data) {
             Ok(Self {
-                width: blp.width,
-                height: blp.height,
                 data: blp.data,
                 filename: filename.to_string(),
             })
         } else if let Ok(tga) = TgaImage::load(&data) {
             Ok(Self {
-                width: tga.width,
-                height: tga.height,
                 data: tga.data,
                 filename: filename.to_string(),
             })
