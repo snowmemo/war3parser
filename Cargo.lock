@@ -780,7 +780,7 @@ dependencies = [
 
 [[package]]
 name = "war3parser"
-version = "0.1.4"
+version = "0.2.0"
 dependencies = [
  "base64",
  "binary-reader",
@@ -795,7 +795,7 @@ dependencies = [
 
 [[package]]
 name = "war3parser-cli"
-version = "0.1.4"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "clap",
@@ -804,7 +804,7 @@ dependencies = [
 
 [[package]]
 name = "war3parser-wasm"
-version = "0.1.4"
+version = "0.2.0"
 dependencies = [
  "war3parser",
  "wasm-bindgen",
