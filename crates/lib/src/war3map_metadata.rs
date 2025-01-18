@@ -3,10 +3,7 @@
 use std::path::Path;
 
 use crate::parser::{
-    error::ParserError,
-    imp::War3MapImp,
-    w3i::War3MapW3i,
-    w3x::{War3Image, War3MapW3x},
+    error::ParserError, img::War3Image, imp::War3MapImp, w3i::War3MapW3i, w3x::War3MapW3x,
     wts::War3MapWts,
 };
 

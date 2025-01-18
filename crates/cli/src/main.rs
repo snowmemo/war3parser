@@ -1,7 +1,7 @@
 use std::path::Path;
 
 use clap::Parser;
-use war3parser::{parser::w3x::War3MapW3x, War3Image, War3MapMetadata};
+use war3parser::prelude::{War3Image, War3MapMetadata, War3MapW3x};
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
@@ -131,7 +131,7 @@ fn main() -> anyhow::Result<()> {
                 if keep_ori {
                     save_file(file, out_dir, &file_content)?;
                 } else {
-                    let image = War3Image::from_buffer(file, &file_content)?;
+                    let image = War3Image::from_buffer(&file_content, file)?;
                     let out_file_path = out_dir.join(
                         file.replace("\\", "/")
                             .replace(".blp", ".png")
@@ -160,7 +160,7 @@ fn main() -> anyhow::Result<()> {
             let image_path = Path::new(&file_name);
             let file_content = std::fs::read(image_path)?;
 
-            let image = War3Image::from_buffer(&file_name, &file_content)?;
+            let image = War3Image::from_buffer(&file_content, &file_name)?;
             let out_file_path = if let Some(out_dir) = out_dir {
                 Path::new(&out_dir).join(
                     image_path

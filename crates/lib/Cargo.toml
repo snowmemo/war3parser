@@ -22,3 +22,4 @@ regex = "1.10.5"
 thiserror = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
+base64 = "0.22.1"

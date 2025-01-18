@@ -1,24 +1,16 @@
 use std::path::PathBuf;
 
 use binary_reader::{BinaryReader, Endian};
-use image::RgbaImage;
 use mpq::{Archive, File};
 
 use super::{
     binary_reader::{AutoReadable, BinaryReadable},
-    blp::BlpImage,
     error::ParserError,
+    img::War3Image,
     imp::War3MapImp,
-    tga::TgaImage,
     w3i::War3MapW3i,
     wts::War3MapWts,
 };
-
-/// Image with basic metadata and [`image::RgbaImage`] data
-pub struct War3Image {
-    pub data: RgbaImage,
-    pub filename: String,
-}
 
 /// Warcraft 3 map entry
 pub struct War3MapW3x {
@@ -31,25 +23,6 @@ pub struct War3MapW3x {
     pub archive: Archive,
     /// List of files in `(listfile)`
     pub files: Option<Vec<String>>,
-}
-
-impl War3Image {
-    /// Convert a raw binary buffer to an [`War3Image`]
-    pub fn from_buffer(filename: &str, data: &[u8]) -> Result<Self, ParserError> {
-        if let Ok(blp) = BlpImage::load(&data) {
-            Ok(Self {
-                data: blp.data,
-                filename: filename.to_string(),
-            })
-        } else if let Ok(tga) = TgaImage::load(&data) {
-            Ok(Self {
-                data: tga.data,
-                filename: filename.to_string(),
-            })
-        } else {
-            Err(ParserError::FailedToConvertBufferToImage)
-        }
-    }
 }
 
 impl BinaryReadable for War3MapW3x {
@@ -171,7 +144,7 @@ impl War3MapW3x {
         let buffer = self.get(filename)?;
         let mut data = vec![0; buffer.size() as usize];
         buffer.read(&mut self.archive, &mut data)?;
-        War3Image::from_buffer(filename, &data)
+        War3Image::from_buffer(&data, filename)
     }
 
     /// Read the preview image from the MPQ archive
@@ -188,6 +161,6 @@ impl War3MapW3x {
         let buffer = self.get(filename)?;
         let mut data = vec![0; buffer.size() as usize];
         buffer.read(&mut self.archive, &mut data)?;
-        War3Image::from_buffer(filename, &data)
+        War3Image::from_buffer(&data, filename)
     }
 }

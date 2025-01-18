@@ -29,17 +29,17 @@ pub mod parser;
 /// Helper struct that includes all supported metadata of a map file
 pub mod war3map_metadata;
 
-#[doc(inline)]
-pub use war3map_metadata::War3MapMetadata;
-
-#[doc(inline)]
-pub use parser::{
-    binary_reader::BinaryReadable,
-    blp::BlpImage,
-    error::ParserError,
-    imp::War3MapImp,
-    tga::TgaImage,
-    w3i::War3MapW3i,
-    w3x::{War3Image, War3MapW3x},
-    wts::War3MapWts,
-};
+pub mod prelude {
+    #[doc(inline)]
+    pub use crate::parser::{
+        binary_reader::BinaryReadable,
+        error::ParserError,
+        img::{War3Image, War3ImageBase64},
+        imp::War3MapImp,
+        w3i::War3MapW3i,
+        w3x::War3MapW3x,
+        wts::War3MapWts,
+    };
+    #[doc(inline)]
+    pub use crate::war3map_metadata::War3MapMetadata;
+}
