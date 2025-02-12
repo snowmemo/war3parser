@@ -1,12 +1,17 @@
 use binary_reader::BinaryReader;
-use serde::{Deserialize, Serialize};
 
 use crate::parser::{
     binary_reader::{AutoReadable, BinaryReadable},
     error::ParserError,
 };
 
-#[derive(Debug, Serialize, Deserialize)]
+#[cfg_attr(
+    feature = "wasm",
+    derive(tsify_next::Tsify),
+    tsify(into_wasm_abi, from_wasm_abi)
+)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Debug)]
 pub struct UpgradeAvailabilityChange {
     pub player_flags: u32,
     pub id: [u8; 4],

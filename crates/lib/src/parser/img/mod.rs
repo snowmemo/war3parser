@@ -5,11 +5,19 @@ use base64::{engine::general_purpose, write::EncoderWriter};
 use image::{codecs::tga::TgaDecoder, DynamicImage, ImageOutputFormat};
 use image_blp::{convert::blp_to_image, parser::load_blp_from_buf};
 
+#[derive(Debug, Clone)]
 pub struct War3Image {
     pub data: DynamicImage,
     pub filename: String,
 }
 
+#[cfg_attr(
+    feature = "wasm",
+    derive(tsify_next::Tsify),
+    tsify(into_wasm_abi, from_wasm_abi)
+)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Debug, Clone)]
 pub struct War3ImageBase64 {
     pub data: String,
     pub filename: String,

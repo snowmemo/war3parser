@@ -5,10 +5,11 @@
 //! This crate is used to create WASM bindings for the war3parser crate.
 //!
 //! Prebuilt wasm files are available in [@wesleyel/war3parser](https://www.npmjs.com/package/@wesleyel/war3parser)
-pub mod mapinfo;
+pub mod impls;
 pub mod types;
 
 #[doc(inline)]
-pub use mapinfo::WasmMapInfo;
+pub use types::*;
+
 #[doc(inline)]
-pub use types::{wasm_image::WasmImage, wasm_w3i::WasmW3i};
+pub use impls::*;

@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 
 use regex::Regex;
-use serde::{Deserialize, Serialize};
 
 use super::error::ParserError;
 
@@ -9,7 +8,13 @@ use super::error::ParserError;
 const STRINGS_RE: &str = r"STRING\s+([0-9]+)\s+\{\r\n+([^\}]*)\r\n\}";
 
 /// String table
-#[derive(Debug, Serialize, Deserialize)]
+#[cfg_attr(
+    feature = "wasm",
+    derive(tsify_next::Tsify),
+    tsify(into_wasm_abi, from_wasm_abi)
+)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Debug)]
 pub struct War3MapWts {
     pub string_map: HashMap<i32, String>,
 }

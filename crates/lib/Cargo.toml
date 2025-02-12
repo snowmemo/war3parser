@@ -20,6 +20,13 @@ image-blp = { workspace = true }
 mpq = "0.8.0"
 regex = "1.10.5"
 thiserror = { workspace = true }
-serde = { workspace = true, features = ["derive"] }
-serde_json = { workspace = true }
 base64 = "0.22.1"
+serde = { workspace = true, features = ["derive"], optional = true }
+serde_json = { workspace = true, optional = true }
+tsify-next = { workspace = true, optional = true }
+wasm-bindgen = { workspace = true, optional = true }
+
+[features]
+default = ["wasm"]
+serde = ["dep:serde", "dep:serde_json"]
+wasm = ["serde", "dep:tsify-next", "dep:wasm-bindgen"]

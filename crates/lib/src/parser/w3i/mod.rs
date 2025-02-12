@@ -9,7 +9,6 @@ use std::collections::HashMap;
 
 use binary_reader::BinaryReader;
 use regex::Regex;
-use serde::{Deserialize, Serialize};
 
 use crate::parser::binary_reader::{AutoReadable, BinaryReadable};
 
@@ -24,7 +23,13 @@ use {
 /// Map info for `war3map.w3i` file
 ///
 /// Special thanks to [mdx-m3-viewer](https://github.com/flowtsohg/mdx-m3-viewer) for the map info format
-#[derive(Debug, Serialize, Deserialize)]
+#[cfg_attr(
+    feature = "wasm",
+    derive(tsify_next::Tsify),
+    tsify(into_wasm_abi, from_wasm_abi)
+)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Debug)]
 pub struct War3MapW3i {
     pub version: u32,
     pub saves: u32,

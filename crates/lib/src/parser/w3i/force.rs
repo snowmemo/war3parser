@@ -1,10 +1,15 @@
 use binary_reader::BinaryReader;
-use serde::{Deserialize, Serialize};
 
 use crate::parser::binary_reader::{AutoReadable, BinaryReadable};
 use crate::parser::error::ParserError;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[cfg_attr(
+    feature = "wasm",
+    derive(tsify_next::Tsify),
+    tsify(into_wasm_abi, from_wasm_abi)
+)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Debug)]
 pub struct Force {
     pub flags: u32,
     pub player_masks: u32,
